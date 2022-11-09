@@ -1078,11 +1078,11 @@ int baseLine;
 int yy;
 
 	if (field->type == F_NONE) { /* nothing to display in field */
-		return;
+		return 0;
 		}
 
 	if (field->type != F_TEXT) { /* routine only does text at this time */
-		return;
+		return 0;
 		}
 
 	/* adjust for aesthetic surounding space */
@@ -1136,6 +1136,7 @@ int yy;
 			   CapNotLast,
 			   JoinMiter);
 
+return 0;
 } /* TableDisplayField() */
 
 

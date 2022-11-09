@@ -62,7 +62,8 @@ int i;
 	if (setjmp(jerr.setjmp_buffer)) {
 		/* If we get here, the JPEG code has signaled an error. */
     		jpeg_destroy_decompress(&cinfo);
-		fclose(infile);
+		/* LEAVE THE FILE OPEN! Otherwise we get a double-free. */
+		/* NO! fclose(infile); */
 
 		if (retBuffer) {
 			free(retBuffer);

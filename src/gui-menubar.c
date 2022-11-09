@@ -121,7 +121,8 @@ static char *urllist[MAX_DOCUMENTS_MENU_ITEMS];
 
 static XmxCallback (exit_confirm_cb);
 static void mo_post_exitbox (void);
-static long wrapFont (char *name);
+static XtArgVal wrapFont (char *name);
+/* static long wrapFont (char *name); */ /* doesn't work on 64 bit */
 static XmxCallback (clear_history_confirm_cb);
 static mo_status mo_do_delete_annotation (mo_window *win);
 static XmxCallback (delete_annotation_confirm_cb);
@@ -179,6 +180,7 @@ mo_status mo_set_fancy_selections_toggle (mo_window *win)
 
 /* ---------------------------- mo_set_fonts ---------------------------- */
 
+#if(0) /* doesn't work on 64-bit */
 static long wrapFont (char *name)
 {
   XFontStruct *font = XLoadQueryFont (dsp, name);
@@ -192,6 +194,18 @@ static long wrapFont (char *name)
     }
   return ((long)font);
 }
+#endif
+
+/* somehow XFontStruct doesn't work here on 64-bit, so just use void* */
+static XtArgVal wrapFont (char *name)
+{
+  void *font = XLoadQueryFont(dsp, name);
+  if (font == NULL) {
+    fprintf(stderr, "Could not load font %s, using fixed font\n", name);
+    return ((XtArgVal)XLoadQueryFont(dsp, "fixed"));
+  }
+  return ((XtArgVal)font);
+}
 
 mo_status mo_set_fonts (mo_window *win, int size)
 {
@@ -204,17 +218,17 @@ mo_status mo_set_fonts (mo_window *win, int size)
       XmxSetArg (WbNfixedFont, wrapFont("-adobe-courier-medium-r-normal-*-20-*-*-*-*-*-*-*"));
       XmxSetArg (WbNfixedboldFont, wrapFont("-adobe-courier-bold-r-normal-*-20-*-*-*-*-*-*-*"));
       XmxSetArg (WbNfixeditalicFont, wrapFont("-adobe-courier-medium-o-normal-*-20-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNheader1Font, wrapFont("-adobe-times-bold-r-normal-*-25-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNheader2Font, wrapFont("-adobe-times-bold-r-normal-*-24-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNheader1Font, wrapFont("-adobe-times-bold-r-normal-*-34-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNheader2Font, wrapFont("-adobe-times-bold-r-normal-*-25-*-*-*-*-*-*-*"));
       XmxSetArg (WbNheader3Font, wrapFont("-adobe-times-bold-r-normal-*-20-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNheader4Font, wrapFont("-adobe-times-bold-r-normal-*-18-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNheader5Font, wrapFont("-adobe-times-bold-r-normal-*-17-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNheader6Font, wrapFont("-adobe-times-bold-r-normal-*-14-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNheader4Font, wrapFont("-adobe-times-bold-r-normal-*-17-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNheader5Font, wrapFont("-adobe-times-bold-r-normal-*-14-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNheader6Font, wrapFont("-adobe-times-bold-r-normal-*-11-*-*-*-*-*-*-*"));
       XmxSetArg (WbNaddressFont, wrapFont("-adobe-times-medium-i-normal-*-20-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNplainFont, wrapFont("-adobe-courier-medium-r-normal-*-18-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNplainboldFont, wrapFont("-adobe-courier-bold-r-normal-*-18-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNplainitalicFont, wrapFont("-adobe-courier-medium-o-normal-*-18-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNsupSubFont, wrapFont("-adobe-times-medium-r-normal-*-14-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNplainFont, wrapFont("-adobe-courier-medium-r-normal-*-17-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNplainboldFont, wrapFont("-adobe-courier-bold-r-normal-*-17-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNplainitalicFont, wrapFont("-adobe-courier-medium-o-normal-*-17-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNsupSubFont, wrapFont("-adobe-times-medium-r-normal-*-11-*-*-*-*-*-*-*"));
 
       XmxSetValues (win->scrolled_win);
       win->font_family = 0;
@@ -226,17 +240,17 @@ mo_status mo_set_fonts (mo_window *win, int size)
       XmxSetArg (WbNfixedFont, wrapFont("-adobe-courier-medium-r-normal-*-17-*-*-*-*-*-*-*"));
       XmxSetArg (WbNfixedboldFont, wrapFont("-adobe-courier-bold-r-normal-*-17-*-*-*-*-*-*-*"));
       XmxSetArg (WbNfixeditalicFont, wrapFont("-adobe-courier-medium-o-normal-*-17-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNheader1Font, wrapFont("-adobe-times-bold-r-normal-*-24-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNheader2Font, wrapFont("-adobe-times-bold-r-normal-*-18-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNheader1Font, wrapFont("-adobe-times-bold-r-normal-*-25-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNheader2Font, wrapFont("-adobe-times-bold-r-normal-*-20-*-*-*-*-*-*-*"));
       XmxSetArg (WbNheader3Font, wrapFont("-adobe-times-bold-r-normal-*-17-*-*-*-*-*-*-*"));
       XmxSetArg (WbNheader4Font, wrapFont("-adobe-times-bold-r-normal-*-14-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNheader5Font, wrapFont("-adobe-times-bold-r-normal-*-12-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNheader6Font, wrapFont("-adobe-times-bold-r-normal-*-10-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNheader5Font, wrapFont("-adobe-times-bold-r-normal-*-11-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNheader6Font, wrapFont("-adobe-times-bold-r-normal-*-11-*-*-*-*-*-*-*"));
       XmxSetArg (WbNaddressFont, wrapFont("-adobe-times-medium-i-normal-*-17-*-*-*-*-*-*-*"));
       XmxSetArg (WbNplainFont, wrapFont("-adobe-courier-medium-r-normal-*-14-*-*-*-*-*-*-*"));
       XmxSetArg (WbNplainboldFont, wrapFont("-adobe-courier-bold-r-normal-*-14-*-*-*-*-*-*-*"));
       XmxSetArg (WbNplainitalicFont, wrapFont("-adobe-courier-medium-o-normal-*-14-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNsupSubFont, wrapFont("-adobe-times-medium-r-normal-*-10-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNsupSubFont, wrapFont("-adobe-times-medium-r-normal-*-11-*-*-*-*-*-*-*"));
       XmxSetValues (win->scrolled_win);
       win->font_family = 0;
       break;
@@ -247,17 +261,17 @@ mo_status mo_set_fonts (mo_window *win, int size)
       XmxSetArg (WbNfixedFont, wrapFont("-adobe-courier-medium-r-normal-*-14-*-*-*-*-*-*-*"));
       XmxSetArg (WbNfixedboldFont, wrapFont("-adobe-courier-bold-r-normal-*-14-*-*-*-*-*-*-*"));
       XmxSetArg (WbNfixeditalicFont, wrapFont("-adobe-courier-medium-o-normal-*-14-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNheader1Font, wrapFont("-adobe-times-bold-r-normal-*-18-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNheader2Font, wrapFont("-adobe-times-bold-r-normal-*-17-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNheader1Font, wrapFont("-adobe-times-bold-r-normal-*-17-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNheader2Font, wrapFont("-adobe-times-bold-r-normal-*-14-*-*-*-*-*-*-*"));
       XmxSetArg (WbNheader3Font, wrapFont("-adobe-times-bold-r-normal-*-14-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNheader4Font, wrapFont("-adobe-times-bold-r-normal-*-12-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNheader5Font, wrapFont("-adobe-times-bold-r-normal-*-10-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNheader6Font, wrapFont("-adobe-times-bold-r-normal-*-8-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNheader4Font, wrapFont("-adobe-times-bold-r-normal-*-11-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNheader5Font, wrapFont("-adobe-times-bold-r-normal-*-11-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNheader6Font, wrapFont("-adobe-times-bold-r-normal-*-11-*-*-*-*-*-*-*"));
       XmxSetArg (WbNaddressFont, wrapFont("-adobe-times-medium-i-normal-*-14-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNplainFont, wrapFont("-adobe-courier-medium-r-normal-*-12-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNplainboldFont, wrapFont("-adobe-courier-bold-r-normal-*-12-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNplainitalicFont, wrapFont("-adobe-courier-medium-o-normal-*-12-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNsupSubFont, wrapFont("-adobe-times-medium-r-normal-*-8-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNplainFont, wrapFont("-adobe-courier-medium-r-normal-*-11-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNplainboldFont, wrapFont("-adobe-courier-bold-r-normal-*-11-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNplainitalicFont, wrapFont("-adobe-courier-medium-o-normal-*-11-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNsupSubFont, wrapFont("-adobe-times-medium-r-normal-*-11-*-*-*-*-*-*-*"));
 
       XmxSetValues (win->scrolled_win);
       win->font_family = 0;
@@ -269,17 +283,17 @@ mo_status mo_set_fonts (mo_window *win, int size)
       XmxSetArg (WbNfixedFont, wrapFont("-adobe-courier-medium-r-normal-*-20-*-*-*-*-*-*-*"));
       XmxSetArg (WbNfixedboldFont, wrapFont("-adobe-courier-bold-r-normal-*-20-*-*-*-*-*-*-*"));
       XmxSetArg (WbNfixeditalicFont, wrapFont("-adobe-courier-medium-o-normal-*-20-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNheader1Font, wrapFont("-adobe-helvetica-bold-r-normal-*-25-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNheader2Font, wrapFont("-adobe-helvetica-bold-r-normal-*-24-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNheader1Font, wrapFont("-adobe-helvetica-bold-r-normal-*-34-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNheader2Font, wrapFont("-adobe-helvetica-bold-r-normal-*-25-*-*-*-*-*-*-*"));
       XmxSetArg (WbNheader3Font, wrapFont("-adobe-helvetica-bold-r-normal-*-20-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNheader4Font, wrapFont("-adobe-helvetica-bold-r-normal-*-18-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNheader5Font, wrapFont("-adobe-helvetica-bold-r-normal-*-17-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNheader6Font, wrapFont("-adobe-helvetica-bold-r-normal-*-14-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNheader4Font, wrapFont("-adobe-helvetica-bold-r-normal-*-17-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNheader5Font, wrapFont("-adobe-helvetica-bold-r-normal-*-14-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNheader6Font, wrapFont("-adobe-helvetica-bold-r-normal-*-11-*-*-*-*-*-*-*"));
       XmxSetArg (WbNaddressFont, wrapFont("-adobe-helvetica-medium-o-normal-*-20-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNplainFont, wrapFont("-adobe-courier-medium-r-normal-*-18-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNplainboldFont, wrapFont("-adobe-courier-bold-r-normal-*-18-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNplainitalicFont, wrapFont("-adobe-courier-medium-o-normal-*-18-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNsupSubFont, wrapFont("-adobe-helvetica-medium-r-normal-*-14-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNplainFont, wrapFont("-adobe-courier-medium-r-normal-*-17-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNplainboldFont, wrapFont("-adobe-courier-bold-r-normal-*-17-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNplainitalicFont, wrapFont("-adobe-courier-medium-o-normal-*-17-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNsupSubFont, wrapFont("-adobe-helvetica-medium-r-normal-*-11-*-*-*-*-*-*-*"));
       XmxSetValues (win->scrolled_win);
       win->font_family = 1;
       break;
@@ -290,17 +304,17 @@ mo_status mo_set_fonts (mo_window *win, int size)
       XmxSetArg (WbNfixedFont, wrapFont("-adobe-courier-medium-r-normal-*-17-*-*-*-*-*-*-*"));
       XmxSetArg (WbNfixedboldFont, wrapFont("-adobe-courier-bold-r-normal-*-17-*-*-*-*-*-*-*"));
       XmxSetArg (WbNfixeditalicFont, wrapFont("-adobe-courier-medium-o-normal-*-17-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNheader1Font, wrapFont("-adobe-helvetica-bold-r-normal-*-24-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNheader2Font, wrapFont("-adobe-helvetica-bold-r-normal-*-18-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNheader1Font, wrapFont("-adobe-helvetica-bold-r-normal-*-25-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNheader2Font, wrapFont("-adobe-helvetica-bold-r-normal-*-20-*-*-*-*-*-*-*"));
       XmxSetArg (WbNheader3Font, wrapFont("-adobe-helvetica-bold-r-normal-*-17-*-*-*-*-*-*-*"));
       XmxSetArg (WbNheader4Font, wrapFont("-adobe-helvetica-bold-r-normal-*-14-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNheader5Font, wrapFont("-adobe-helvetica-bold-r-normal-*-12-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNheader6Font, wrapFont("-adobe-helvetica-bold-r-normal-*-10-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNheader5Font, wrapFont("-adobe-helvetica-bold-r-normal-*-11-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNheader6Font, wrapFont("-adobe-helvetica-bold-r-normal-*-11-*-*-*-*-*-*-*"));
       XmxSetArg (WbNaddressFont, wrapFont("-adobe-helvetica-medium-o-normal-*-17-*-*-*-*-*-*-*"));
       XmxSetArg (WbNplainFont, wrapFont("-adobe-courier-medium-r-normal-*-14-*-*-*-*-*-*-*"));
       XmxSetArg (WbNplainboldFont, wrapFont("-adobe-courier-bold-r-normal-*-14-*-*-*-*-*-*-*"));
       XmxSetArg (WbNplainitalicFont, wrapFont("-adobe-courier-medium-o-normal-*-14-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNsupSubFont, wrapFont("-adobe-helvetica-medium-r-normal-*-10-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNsupSubFont, wrapFont("-adobe-helvetica-medium-r-normal-*-11-*-*-*-*-*-*-*"));
       XmxSetValues (win->scrolled_win);
       win->font_family = 1;
       break;
@@ -311,17 +325,17 @@ mo_status mo_set_fonts (mo_window *win, int size)
       XmxSetArg (WbNfixedFont, wrapFont("-adobe-courier-medium-r-normal-*-14-*-*-*-*-*-*-*"));
       XmxSetArg (WbNfixedboldFont, wrapFont("-adobe-courier-bold-r-normal-*-14-*-*-*-*-*-*-*"));
       XmxSetArg (WbNfixeditalicFont, wrapFont("-adobe-courier-medium-o-normal-*-14-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNheader1Font, wrapFont("-adobe-helvetica-bold-r-normal-*-18-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNheader2Font, wrapFont("-adobe-helvetica-bold-r-normal-*-17-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNheader3Font, wrapFont("-adobe-helvetica-bold-r-normal-*-14-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNheader4Font, wrapFont("-adobe-helvetica-bold-r-normal-*-12-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNheader5Font, wrapFont("-adobe-helvetica-bold-r-normal-*-10-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNheader6Font, wrapFont("-adobe-helvetica-bold-r-normal-*-8-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNheader1Font, wrapFont("-adobe-helvetica-bold-r-normal-*-17-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNheader2Font, wrapFont("-adobe-helvetica-bold-r-normal-*-14-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNheader3Font, wrapFont("-adobe-helvetica-bold-r-normal-*-11-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNheader4Font, wrapFont("-adobe-helvetica-bold-r-normal-*-11-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNheader5Font, wrapFont("-adobe-helvetica-bold-r-normal-*-11-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNheader6Font, wrapFont("-adobe-helvetica-bold-r-normal-*-11-*-*-*-*-*-*-*"));
       XmxSetArg (WbNaddressFont, wrapFont("-adobe-helvetica-medium-o-normal-*-14-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNplainFont, wrapFont("-adobe-courier-medium-r-normal-*-12-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNplainboldFont, wrapFont("-adobe-courier-bold-r-normal-*-12-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNplainitalicFont, wrapFont("-adobe-courier-medium-o-normal-*-12-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNsupSubFont, wrapFont("-adobe-helvetica-medium-r-normal-*-8-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNplainFont, wrapFont("-adobe-courier-medium-r-normal-*-11-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNplainboldFont, wrapFont("-adobe-courier-bold-r-normal-*-11-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNplainitalicFont, wrapFont("-adobe-courier-medium-o-normal-*-11-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNsupSubFont, wrapFont("-adobe-helvetica-medium-r-normal-*-11-*-*-*-*-*-*-*"));
 
       XmxSetValues (win->scrolled_win);
       win->font_family = 1;
@@ -333,17 +347,18 @@ mo_status mo_set_fonts (mo_window *win, int size)
       XmxSetArg (WbNfixedFont, wrapFont("-adobe-courier-medium-r-normal-*-20-*-*-*-*-*-*-*"));
       XmxSetArg (WbNfixedboldFont, wrapFont("-adobe-courier-bold-r-normal-*-20-*-*-*-*-*-*-*"));
       XmxSetArg (WbNfixeditalicFont, wrapFont("-adobe-courier-medium-o-normal-*-20-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNheader1Font, wrapFont("-adobe-new century schoolbook-bold-r-normal-*-25-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNheader2Font, wrapFont("-adobe-new century schoolbook-bold-r-normal-*-24-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNheader1Font, wrapFont("-adobe-new century schoolbook-bold-r-normal-*-34-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNheader2Font, wrapFont("-adobe-new century schoolbook-bold-r-normal-*-25-*-*-*-*-*-*-*"));
       XmxSetArg (WbNheader3Font, wrapFont("-adobe-new century schoolbook-bold-r-normal-*-20-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNheader4Font, wrapFont("-adobe-new century schoolbook-bold-r-normal-*-18-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNheader5Font, wrapFont("-adobe-new century schoolbook-bold-r-normal-*-17-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNheader6Font, wrapFont("-adobe-new century schoolbook-bold-r-normal-*-14-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNheader4Font, wrapFont("-adobe-new century schoolbook-bold-r-normal-*-17-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNheader5Font, wrapFont("-adobe-new century schoolbook-bold-r-normal-*-14-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNheader6Font, wrapFont("-adobe-new century schoolbook-bold-r-normal-*-11-*-*-*-*-*-*-*"));
       XmxSetArg (WbNaddressFont, wrapFont("-adobe-new century schoolbook-medium-i-normal-*-20-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNplainFont, wrapFont("-adobe-courier-medium-r-normal-*-18-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNplainboldFont, wrapFont("-adobe-courier-bold-r-normal-*-18-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNplainitalicFont, wrapFont("-adobe-courier-medium-o-normal-*-18-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNplainFont, wrapFont("-adobe-courier-medium-r-normal-*-17-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNplainboldFont, wrapFont("-adobe-courier-bold-r-normal-*-17-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNplainitalicFont, wrapFont("-adobe-courier-medium-o-normal-*-17-*-*-*-*-*-*-*"));
       XmxSetArg (WbNsupSubFont, wrapFont("-adobe-new century schoolbook-medium-r-normal-*-14-*-*-*-*-*-*-*"));
+
       XmxSetValues (win->scrolled_win);
       win->font_family = 2;
       break;
@@ -354,38 +369,38 @@ mo_status mo_set_fonts (mo_window *win, int size)
       XmxSetArg (WbNfixedFont, wrapFont("-adobe-courier-medium-r-normal-*-14-*-*-*-*-*-*-*"));
       XmxSetArg (WbNfixedboldFont, wrapFont("-adobe-courier-bold-r-normal-*-14-*-*-*-*-*-*-*"));
       XmxSetArg (WbNfixeditalicFont, wrapFont("-adobe-courier-medium-o-normal-*-14-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNheader1Font, wrapFont("-adobe-new century schoolbook-bold-r-normal-*-18-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNheader2Font, wrapFont("-adobe-new century schoolbook-bold-r-normal-*-17-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNheader3Font, wrapFont("-adobe-new century schoolbook-bold-r-normal-*-14-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNheader4Font, wrapFont("-adobe-new century schoolbook-bold-r-normal-*-12-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNheader5Font, wrapFont("-adobe-new century schoolbook-bold-r-normal-*-10-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNheader6Font, wrapFont("-adobe-new century schoolbook-bold-r-normal-*-8-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNheader1Font, wrapFont("-adobe-new century schoolbook-bold-r-normal-*-17-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNheader2Font, wrapFont("-adobe-new century schoolbook-bold-r-normal-*-14-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNheader3Font, wrapFont("-adobe-new century schoolbook-bold-r-normal-*-11-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNheader4Font, wrapFont("-adobe-new century schoolbook-bold-r-normal-*-11-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNheader5Font, wrapFont("-adobe-new century schoolbook-bold-r-normal-*-11-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNheader6Font, wrapFont("-adobe-new century schoolbook-bold-r-normal-*-11-*-*-*-*-*-*-*"));
       XmxSetArg (WbNaddressFont, wrapFont("-adobe-new century schoolbook-medium-i-normal-*-14-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNplainFont, wrapFont("-adobe-courier-medium-r-normal-*-12-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNplainboldFont, wrapFont("-adobe-courier-bold-r-normal-*-12-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNplainitalicFont, wrapFont("-adobe-courier-medium-o-normal-*-12-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNsupSubFont, wrapFont("-adobe-new century schoolbook-medium-r-normal-*-8-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNplainFont, wrapFont("-adobe-courier-medium-r-normal-*-11-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNplainboldFont, wrapFont("-adobe-courier-bold-r-normal-*-11-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNplainitalicFont, wrapFont("-adobe-courier-medium-o-normal-*-11-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNsupSubFont, wrapFont("-adobe-new century schoolbook-medium-r-normal-*-11-*-*-*-*-*-*-*"));
       XmxSetValues (win->scrolled_win);
       win->font_family = 2;
       break;
     case mo_regular_newcentury:
-      XmxSetArg (XtNfont, wrapFont("-adobe-new century schoolbook-medium-r-normal-*-18-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNitalicFont, wrapFont("-adobe-new century schoolbook-medium-i-normal-*-18-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNboldFont, wrapFont("-adobe-new century schoolbook-bold-r-normal-*-18-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNfixedFont, wrapFont("-adobe-courier-medium-r-normal-*-18-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNfixedboldFont, wrapFont("-adobe-courier-bold-r-normal-*-18-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNfixeditalicFont, wrapFont("-adobe-courier-medium-o-normal-*-18-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNheader1Font, wrapFont("-adobe-new century schoolbook-bold-r-normal-*-24-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNheader2Font, wrapFont("-adobe-new century schoolbook-bold-r-normal-*-18-*-*-*-*-*-*-*"));
+      XmxSetArg (XtNfont, wrapFont("-adobe-new century schoolbook-medium-r-normal-*-17-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNitalicFont, wrapFont("-adobe-new century schoolbook-medium-i-normal-*-17-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNboldFont, wrapFont("-adobe-new century schoolbook-bold-r-normal-*-17-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNfixedFont, wrapFont("-adobe-courier-medium-r-normal-*-17-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNfixedboldFont, wrapFont("-adobe-courier-bold-r-normal-*-17-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNfixeditalicFont, wrapFont("-adobe-courier-medium-o-normal-*-17-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNheader1Font, wrapFont("-adobe-new century schoolbook-bold-r-normal-*-25-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNheader2Font, wrapFont("-adobe-new century schoolbook-bold-r-normal-*-20-*-*-*-*-*-*-*"));
       XmxSetArg (WbNheader3Font, wrapFont("-adobe-new century schoolbook-bold-r-normal-*-17-*-*-*-*-*-*-*"));
       XmxSetArg (WbNheader4Font, wrapFont("-adobe-new century schoolbook-bold-r-normal-*-14-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNheader5Font, wrapFont("-adobe-new century schoolbook-bold-r-normal-*-12-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNheader6Font, wrapFont("-adobe-new century schoolbook-bold-r-normal-*-10-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNaddressFont, wrapFont("-adobe-new century schoolbook-medium-i-normal-*-18-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNheader5Font, wrapFont("-adobe-new century schoolbook-bold-r-normal-*-11-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNheader6Font, wrapFont("-adobe-new century schoolbook-bold-r-normal-*-11-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNaddressFont, wrapFont("-adobe-new century schoolbook-medium-i-normal-*-17-*-*-*-*-*-*-*"));
       XmxSetArg (WbNplainFont, wrapFont("-adobe-courier-medium-r-normal-*-14-*-*-*-*-*-*-*"));
       XmxSetArg (WbNplainboldFont, wrapFont("-adobe-courier-bold-r-normal-*-14-*-*-*-*-*-*-*"));
       XmxSetArg (WbNplainitalicFont, wrapFont("-adobe-courier-medium-o-normal-*-14-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNsupSubFont, wrapFont("-adobe-new century schoolbook-medium-r-normal-*-10-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNsupSubFont, wrapFont("-adobe-new century schoolbook-medium-r-normal-*-11-*-*-*-*-*-*-*"));
 
       XmxSetValues (win->scrolled_win);
       win->font_family = 2;
@@ -397,16 +412,16 @@ mo_status mo_set_fonts (mo_window *win, int size)
       XmxSetArg (WbNfixedFont, wrapFont("-b&h-lucidatypewriter-medium-r-normal-*-20-*-*-*-*-*-*-*"));
       XmxSetArg (WbNfixedboldFont, wrapFont("-b&h-lucidatypewriter-bold-r-normal-*-20-*-*-*-*-*-*-*"));
       XmxSetArg (WbNfixeditalicFont, wrapFont("-adobe-courier-medium-o-normal-*-20-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNheader1Font, wrapFont("-b&h-lucidabright-demibold-r-normal-*-25-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNheader2Font, wrapFont("-b&h-lucidabright-demibold-r-normal-*-24-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNheader1Font, wrapFont("-b&h-lucidabright-demibold-r-normal-*-34-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNheader2Font, wrapFont("-b&h-lucidabright-demibold-r-normal-*-25-*-*-*-*-*-*-*"));
       XmxSetArg (WbNheader3Font, wrapFont("-b&h-lucidabright-demibold-r-normal-*-20-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNheader4Font, wrapFont("-b&h-lucidabright-demibold-r-normal-*-18-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNheader5Font, wrapFont("-b&h-lucidabright-demibold-r-normal-*-17-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNheader6Font, wrapFont("-b&h-lucidabright-demibold-r-normal-*-14-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNheader4Font, wrapFont("-b&h-lucidabright-demibold-r-normal-*-17-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNheader5Font, wrapFont("-b&h-lucidabright-demibold-r-normal-*-14-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNheader6Font, wrapFont("-b&h-lucidabright-demibold-r-normal-*-11-*-*-*-*-*-*-*"));
       XmxSetArg (WbNaddressFont, wrapFont("-b&h-lucidabright-medium-i-normal-*-20-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNplainFont, wrapFont("-b&h-lucidatypewriter-medium-r-normal-*-18-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNplainboldFont, wrapFont("-b&h-lucidatypewriter-bold-r-normal-*-18-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNplainitalicFont, wrapFont("-adobe-courier-medium-o-normal-*-18-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNplainFont, wrapFont("-b&h-lucidatypewriter-medium-r-normal-*-17-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNplainboldFont, wrapFont("-b&h-lucidatypewriter-bold-r-normal-*-17-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNplainitalicFont, wrapFont("-adobe-courier-medium-o-normal-*-17-*-*-*-*-*-*-*"));
       XmxSetArg (WbNsupSubFont, wrapFont("-b&h-lucidabright-medium-r-normal-*-14-*-*-*-*-*-*-*"));
 
       XmxSetValues (win->scrolled_win);
@@ -418,18 +433,18 @@ mo_status mo_set_fonts (mo_window *win, int size)
       XmxSetArg (WbNboldFont, wrapFont("-b&h-lucidabright-demibold-r-normal-*-17-*-*-*-*-*-*-*"));
       XmxSetArg (WbNfixedFont, wrapFont("-b&h-lucidatypewriter-medium-r-normal-*-17-*-*-*-*-*-*-*"));
       XmxSetArg (WbNfixedboldFont, wrapFont("-b&h-lucidatypewriter-bold-r-normal-*-17-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNfixeditalicFont, wrapFont("-adobe-courier-medium-o-normal-*-18-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNheader1Font, wrapFont("-b&h-lucidabright-demibold-r-normal-*-24-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNheader2Font, wrapFont("-b&h-lucidabright-demibold-r-normal-*-18-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNfixeditalicFont, wrapFont("-adobe-courier-medium-o-normal-*-17-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNheader1Font, wrapFont("-b&h-lucidabright-demibold-r-normal-*-25-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNheader2Font, wrapFont("-b&h-lucidabright-demibold-r-normal-*-20-*-*-*-*-*-*-*"));
       XmxSetArg (WbNheader3Font, wrapFont("-b&h-lucidabright-demibold-r-normal-*-17-*-*-*-*-*-*-*"));
       XmxSetArg (WbNheader4Font, wrapFont("-b&h-lucidabright-demibold-r-normal-*-14-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNheader5Font, wrapFont("-b&h-lucidabright-demibold-r-normal-*-12-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNheader6Font, wrapFont("-b&h-lucidabright-demibold-r-normal-*-10-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNheader5Font, wrapFont("-b&h-lucidabright-demibold-r-normal-*-11-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNheader6Font, wrapFont("-b&h-lucidabright-demibold-r-normal-*-11-*-*-*-*-*-*-*"));
       XmxSetArg (WbNaddressFont, wrapFont("-b&h-lucidabright-medium-i-normal-*-17-*-*-*-*-*-*-*"));
       XmxSetArg (WbNplainFont, wrapFont("-b&h-lucidatypewriter-medium-r-normal-*-14-*-*-*-*-*-*-*"));
       XmxSetArg (WbNplainboldFont, wrapFont("-b&h-lucidatypewriter-bold-r-normal-*-14-*-*-*-*-*-*-*"));
       XmxSetArg (WbNplainitalicFont, wrapFont("-adobe-courier-medium-o-normal-*-14-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNsupSubFont, wrapFont("-b&h-lucidabright-medium-r-normal-*-10-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNsupSubFont, wrapFont("-b&h-lucidabright-medium-r-normal-*-11-*-*-*-*-*-*-*"));
 
       XmxSetValues (win->scrolled_win);
       win->font_family = 3;
@@ -441,17 +456,17 @@ mo_status mo_set_fonts (mo_window *win, int size)
       XmxSetArg (WbNfixedFont, wrapFont("-b&h-lucidatypewriter-medium-r-normal-*-14-*-*-*-*-*-*-*"));
       XmxSetArg (WbNfixedboldFont, wrapFont("-b&h-lucidatypewriter-bold-r-normal-*-14-*-*-*-*-*-*-*"));
       XmxSetArg (WbNfixeditalicFont, wrapFont("-adobe-courier-medium-o-normal-*-14-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNheader1Font, wrapFont("-b&h-lucidabright-demibold-r-normal-*-18-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNheader2Font, wrapFont("-b&h-lucidabright-demibold-r-normal-*-17-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNheader3Font, wrapFont("-b&h-lucidabright-demibold-r-normal-*-14-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNheader4Font, wrapFont("-b&h-lucidabright-demibold-r-normal-*-12-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNheader1Font, wrapFont("-b&h-lucidabright-demibold-r-normal-*-17-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNheader2Font, wrapFont("-b&h-lucidabright-demibold-r-normal-*-14-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNheader3Font, wrapFont("-b&h-lucidabright-demibold-r-normal-*-11-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNheader4Font, wrapFont("-b&h-lucidabright-demibold-r-normal-*-11-*-*-*-*-*-*-*"));
       XmxSetArg (WbNheader5Font, wrapFont("-b&h-lucidabright-demibold-r-normal-*-11-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNheader6Font, wrapFont("-b&h-lucidabright-demibold-r-normal-*-10-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNheader6Font, wrapFont("-b&h-lucidabright-demibold-r-normal-*-11-*-*-*-*-*-*-*"));
       XmxSetArg (WbNaddressFont, wrapFont("-b&h-lucidabright-medium-i-normal-*-14-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNplainFont, wrapFont("-b&h-lucidatypewriter-medium-r-normal-*-12-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNplainboldFont, wrapFont("-b&h-lucidatypewriter-bold-r-normal-*-12-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNplainitalicFont, wrapFont("-adobe-courier-medium-o-normal-*-12-*-*-*-*-*-*-*"));
-      XmxSetArg (WbNsupSubFont, wrapFont("-b&h-lucidabright-medium-r-normal-*-8-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNplainFont, wrapFont("-b&h-lucidatypewriter-medium-r-normal-*-11-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNplainboldFont, wrapFont("-b&h-lucidatypewriter-bold-r-normal-*-11-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNplainitalicFont, wrapFont("-adobe-courier-medium-o-normal-*-11-*-*-*-*-*-*-*"));
+      XmxSetArg (WbNsupSubFont, wrapFont("-b&h-lucidabright-medium-r-normal-*-11-*-*-*-*-*-*-*"));
 
       XmxSetValues (win->scrolled_win);
       win->font_family = 3;

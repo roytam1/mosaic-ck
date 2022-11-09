@@ -149,7 +149,7 @@ img.o: bitmaps/gopher_sound.xbm bitmaps/gopher_index.xbm
 img.o: bitmaps/gopher_telnet.xbm bitmaps/gopher_binary.xbm
 img.o: bitmaps/gopher_unknown.xbm
 
-picread.o: mosaic.h ../libXmx/Xmx.h toolbar.h prefs.h prefs_defs.h 
+picread.o: mosaic.h ../libXmx/Xmx.h toolbar.h prefs.h prefs_defs.h picread.c
 picread.o: picread.h gifread.h xpmread.h readJPEG.h readPNG.h
 
 xpmhash.o: xpm.h

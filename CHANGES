@@ -1,5 +1,27 @@
 See document FEATURES for canonical list of features.
 
+2.7ck12
+-------
+System:
+ o Restored missing pixmaps to the source tree (sorry about that).
+ o Linux make target brought up to date and supports -j (tested on
+   Fedora 32 ppc64le).
+ o New macos target for 64-bit macOS using Homebrew (thanks Mehdi Naraghi).
+ o uosx target brought up to date and supports -j. Only supported on 32-bit
+   i386 and PowerPC, OS X 10.4-10.13.
+ o Vertical scroll wheel support, on systems defining those events.
+ o Fixed a double free that could crash the browser in the JPEG handler.
+ o Fixed potential XSSes in the CSO/ph handler.
+ o Fixed an issue where display fonts wouldn't change on 64-bit systems.
+ o Tweaked font resources to match the common set on most systems.
+ o CSO/ph handler correctly handles continuation lines other than -2xx.
+ o Fixed some compilation errors with MIPSPro 7.x on IRIX.
+
+The Motif Mac Launcher is now limited to 32-bit Mac OS X builds and will not
+be updated for 64-bit or Apple ARM due to its use of deprecated APIs.
+
+2.7ck10, 11: external launcher changes only
+
 2.7ck9
 ------
 (*) = alternative renderer only

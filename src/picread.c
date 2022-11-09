@@ -687,6 +687,7 @@ int *bg;
 /* I can't believe Mosaic works this way... - DXP */
 /* I have to put this BEFORE ReadJPEG, because that code 
    screws up the file pointer by closing it if there is an error - go fig. */
+/* Finally fixed this. -- Cameron */
 	    bit_data = ReadPNG(fp, w, h, colrs);
 	    if (bit_data != NULL) /* ie. it was able to read the image */
 		{
@@ -704,8 +705,8 @@ int *bg;
 		}
 #endif
 
+            if (fp != stdin) fclose(fp);
 	}
-    if ((fp != NULL) && (fp != stdin)) fclose(fp);
     return((unsigned char *)NULL);
 }
 

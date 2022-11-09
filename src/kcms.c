@@ -52,8 +52,8 @@
  * mosaic-x@ncsa.uiuc.edu.                                                  *
  ****************************************************************************/
 #include "../config.h"
+#define _KCMS_
 #include "kcms.h"
-
 
 void CheckKCMS(void) {
 

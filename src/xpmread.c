@@ -81,8 +81,11 @@
  */
 
 #include <sys/time.h>
-struct timeval Tv;
-struct timezone Tz;
+#ifndef DISABLE_TRACE
+/* These symbols conflict with others. */
+struct timeval _Tv;
+struct timezone _Tz;
+#endif
 
 #include "mosaic.h"
 #include "xpmread.h"
@@ -1036,8 +1039,8 @@ unsigned char *ReadXpm3Pixmap(FILE *fp, char *datafile, int *w, int *h,
 
 #ifndef DISABLE_TRACE
 	if (srcTrace) {
-		gettimeofday(&Tv, &Tz);
-		fprintf(stderr, "ReadXpm3Pixmap enter (%d.%d)\n", Tv.tv_sec, Tv.tv_usec);
+		gettimeofday(&_Tv, &_Tz);
+		fprintf(stderr, "ReadXpm3Pixmap enter (%d.%d)\n", _Tv.tv_sec, _Tv.tv_usec);
 	}
 #endif
 
@@ -1142,8 +1145,8 @@ unsigned char *ReadXpm3Pixmap(FILE *fp, char *datafile, int *w, int *h,
 
 #ifndef DISABLE_TRACE
 	if (srcTrace) {
-		gettimeofday(&Tv, &Tz);
-		fprintf(stderr, "ReadXpm3Pixmap exit (%d.%d)\n", Tv.tv_sec, Tv.tv_usec);
+		gettimeofday(&_Tv, &_Tz);
+		fprintf(stderr, "ReadXpm3Pixmap exit (%d.%d)\n", _Tv.tv_sec, _Tv.tv_usec);
 	}
 #endif
 
@@ -1266,8 +1269,8 @@ unsigned char *ProcessXpm3Data(Widget wid, char **xpmdata, int *w,
 
 #ifndef DISABLE_TRACE
 	if (srcTrace) {
-		gettimeofday(&Tv, &Tz);
-		fprintf(stderr, "ReadXpm3Pixmap exit (%d.%d)\n", Tv.tv_sec, Tv.tv_usec);
+		gettimeofday(&_Tv, &_Tz);
+		fprintf(stderr, "ReadXpm3Pixmap exit (%d.%d)\n", _Tv.tv_sec, _Tv.tv_usec);
 	}
 #endif
 

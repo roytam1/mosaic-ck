@@ -1085,15 +1085,6 @@ static XmxCallback (anchor_cb)
   int force_newwin = (event->button == Button2 ? 1 : 0);
   int old_binx_flag;
 
-#ifdef Button4
-#ifdef Button5
-  if (event->button == Button4)
-	fprintf(stderr, "scroll up\n");
-  if (event->button == Button5)
-	fprintf(stderr, "scroll down\n");
-#endif
-#endif
-
   if (!win)
     return;
 
@@ -1487,8 +1478,6 @@ void UpdateButtons (Widget w)
                          &event))
     {
       XButtonEvent *bevent = &(event.xbutton);
-	if (bevent->button == Button4)
-		fprintf(stderr, "scroll up\n");
       if (bevent->window == XtWindow (current_win->logo))
         {
 	  sucka_press_my_globe_i_post_his_event();
@@ -1674,8 +1663,41 @@ void mo_presentation_mode(mo_window *win) {
 	}
 }
 
-/* We need to do something like this for Btn4Down (start) Btn4Up (stop) Up
-	and Btn5Down (start) Btn5Up (stop) Down scroll wheel. */
+#if defined(Button4) && defined(Button5)
+static XmxEventHandler (mo_view_button_handler)
+{
+  Widget sb;
+  String params[1];
+
+  mo_window *win = mo_fetch_window_by_id (XmxExtractUniqid ((int)client_data));
+  if (!win || !event || !win->scrolled_win) return;
+
+  params[0] = "0";
+
+  if (event->xbutton.button == Button4) {
+    XtVaGetValues (win->scrolled_win, XmNverticalScrollBar, 
+                   (long)(&sb), NULL);
+    if (sb && XtIsManaged (sb)){
+        XtCallActionProc (sb, "IncrementUpOrLeft", event, params, 1);
+
+#ifdef SCROLL_FASTER
+        /* Linux in particular seems to scroll too slow. */
+        XtCallActionProc (sb, "IncrementUpOrLeft", event, params, 1);
+#endif
+    }
+  }
+  if (event->xbutton.button == Button5) {
+    XtVaGetValues (win->scrolled_win, XmNverticalScrollBar, 
+                   (long)(&sb), NULL);
+    if (sb && XtIsManaged (sb)) {
+        XtCallActionProc (sb, "IncrementDownOrRight", event, params, 1);
+#ifdef SCROLL_FASTER
+        XtCallActionProc (sb, "IncrementDownOrRight", event, params, 1);
+#endif
+    }
+  }
+}
+#endif
 
 /****************************************************************************
  * name:    mo_view_keypress_handler (PRIVATE)
@@ -2943,6 +2965,11 @@ static mo_status mo_fill_window (mo_window *win)
   XtVaGetValues(win->scrolled_win, WbNview, (long)(&win->view), NULL);
   XmxAddEventHandler
     (win->view, KeyPressMask, mo_view_keypress_handler, 0);
+#if defined(Button4) && defined(Button5)
+  /* scroll wheel */
+  XmxAddEventHandler(win->view, ButtonPress, mo_view_button_handler, 0);
+#endif
+
  /* now that the htmlWidget is created we can do this  */
   mo_make_popup(win->view);
 

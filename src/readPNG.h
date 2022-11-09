@@ -54,7 +54,11 @@
 
 /* Author: DXP */
 
+#ifdef LIBPNG12_FORCE
+#include "../libpng12/png.h"
+#else
 #include "png.h"
+#endif
 
 unsigned char *
 ReadPNG(FILE *infile,int *width, int *height, XColor *colrs);

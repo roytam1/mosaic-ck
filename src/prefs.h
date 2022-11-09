@@ -349,7 +349,7 @@ FILE *rfopen(char *path, char *mode); /* for Mosaic-CK */
   1) Figure out what you want to call it. (duh)
 
   2) Add it to the structure in xresources.h. (This will eventually go
-     away, but do it for now.
+     away, but do it for now.)
 
   2) Figure out where you want it to go in the above structures. For
      example, any preference which would normally be added as an xresource

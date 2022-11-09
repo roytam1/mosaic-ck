@@ -73,7 +73,6 @@
 #include <string.h>
 
 /* swp */
-#define _KCMS_H_
 #include "kcms.h"
 
 char *userPath=NULL;

@@ -184,10 +184,10 @@ krblibs   = $(krb4libs) $(krb5libs)
 
 #### -lm is required for freeWAIS 0.5, as ceil() is used.
 
-waisroot = /xdev/mosaic/freeWAIS/irix5
-waisflags = -DDIRECT_WAIS -I$(waisroot)/include
-waislibdir = $(waisroot)/bin
-waislibs = $(waislibdir)/inv.a $(waislibdir)/wais.a $(waislibdir)/libftw.a -lm
+#waisroot = /xdev/mosaic/freeWAIS/irix5
+#waisflags = -DDIRECT_WAIS -I$(waisroot)/include
+#waislibdir = $(waisroot)/bin
+#waislibs = $(waislibdir)/inv.a $(waislibdir)/wais.a $(waislibdir)/libftw.a -lm
 
 
 #### Customization flags:
@@ -235,7 +235,7 @@ sockslibs =
 ####      modifying the Makefiles, so you may comment it out without harm.
 ########
 ########
--include local-defines/$(DEV_ARCH)
+#-include local-defines/$(DEV_ARCH)
 
 
 

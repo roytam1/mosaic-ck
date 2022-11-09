@@ -96,6 +96,9 @@ PRIVATE void HTAccessInit NOARGS			/* Call me once */
 {
 extern HTProtocol HTTP, HTFile, HTTelnet, HTTn3270, HTRlogin;
 extern HTProtocol HTFTP, HTNews, HTGopher, HTMailto, HTNNTP;
+#ifdef DIRECT_HTTPS
+extern HTProtocol HTTPS;
+#endif
 #ifdef DIRECT_WAIS
 extern HTProtocol HTWAIS;
 #endif
@@ -113,6 +116,9 @@ extern HTProtocol HTWAIS;
     HTRegisterProtocol(&HTRlogin);
     HTRegisterProtocol(&HTMailto);
     HTRegisterProtocol(&HTNNTP);
+#ifdef DIRECT_HTTPS
+    HTRegisterProtocol(&HTTPS);
+#endif
 }
 
 

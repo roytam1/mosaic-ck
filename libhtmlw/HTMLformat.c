@@ -56,8 +56,10 @@
 #include "../config.h"
 #ifndef VMS
 #include <sys/time.h>
-struct timeval Tv;
-struct timezone Tz;
+#ifndef DISABLE_TRACE
+struct timeval __Tv;
+struct timezone __Tz;
+#endif
 #else
 #include <time.h>
 #endif
@@ -2727,7 +2729,7 @@ int extra;
 
 	if ((*mptr)->is_end) {
 		/* end of table */
-		return;
+		return 0;
 		}
 
 	extra = 10;
@@ -2737,7 +2739,7 @@ int extra;
 		NULL, NULL, NULL, IMAGE_DEFAULT_BORDER); 
 	if (!Current->table_data) {
 		/* no table */
-		return;
+		return 0;
 		}
 	Current->alignment = ALIGN_MIDDLE;
 	Current->width = Current->table_data->width;
@@ -2747,6 +2749,7 @@ int extra;
 
 	*x += Current->width + 1;
 	LineFeed(hw, x, y); 
+	return 0;
 }
 
 /*
@@ -5045,8 +5048,8 @@ FormatAll(hw, Fwidth)
 #ifndef DISABLE_TRACE
 	if (htmlwTrace) {
 #ifndef VMS
-		gettimeofday(&Tv, &Tz);
-		fprintf(stderr, "FormatAll enter (%d.%d)\n", Tv.tv_sec, Tv.tv_usec);
+		gettimeofday(&__Tv, &__Tz);
+		fprintf(stderr, "FormatAll enter (%d.%d)\n", __Tv.tv_sec, __Tv.tv_usec);
 #else
                 fprintf(stderr, "FormatAll enter (%s)\n", asctime(localtime(&clock)));
 #endif
@@ -5261,8 +5264,8 @@ FormatAll(hw, Fwidth)
 #ifndef DISABLE_TRACE
 	if (htmlwTrace) {
 #ifndef VMS
-		gettimeofday(&Tv, &Tz);
-		fprintf(stderr, "FormatAll exit (%d.%d)\n", Tv.tv_sec, Tv.tv_usec);
+		gettimeofday(&__Tv, &__Tz);
+		fprintf(stderr, "FormatAll exit (%d.%d)\n", __Tv.tv_sec, __Tv.tv_usec);
 #else
                 fprintf(stderr, "FormatAll exit (%s)\n", asctime(localtime(&clock)));
 #endif

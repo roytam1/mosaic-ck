@@ -1,8 +1,6 @@
-
-#ifndef _KCMS_H_
+#ifdef _KCMS_
 int KCMS_Enabled;
 int KCMS_Return_Format;
-#define _KCMS_H_
 #else
 extern int KCMS_Enabled;
 extern int KCMS_Return_Format;

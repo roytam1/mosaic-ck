@@ -133,12 +133,13 @@ static_xlibs = /usr/X11R6/lib/libXpm.a /usr/X11R6/lib/libXm.a /usr/X11R6/lib/lib
 
 #### PNG SUPPORT
 #### For inline PNG support, the following should be defined:
-#### The libraries currently used are PNGLIB 0.81 and ZLIB 0.95
+#### Note that Mosaic only speaks libpng12.
 
 pngdir = /usr
-pnglibdir = $(pngdir)/lib
-pngincludedir = $(pngdir)/include
-pnglibs = $(pnglibdir)/libpng.a $(pnglibdir)/libz.a /usr/lib/libm.a
+pnglibdir = $(pngdir)/lib64
+pngincludedir = $(pngdir)/include/libpng12
+#pnglibs = $(pnglibdir)/libpng12.so $(pnglibdir)/libz.so /usr/lib64/libm.so
+pnglibs = -lpng12 -lz -lm
 pngflags =  -I$(pngincludedir) -DHAVE_PNG
 
 #### JPEG SUPPORT
@@ -146,7 +147,8 @@ pngflags =  -I$(pngincludedir) -DHAVE_PNG
 #### The library used is Independent JPEG Group (IJG's) 5.0a.
 
 jpegdir = /usr
-jpeglibs = $(jpegdir)/lib/libjpeg.a
+#jpeglibs = $(jpegdir)/lib64/libjpeg.so
+jpeglibs = -ljpeg
 jpegflags = -I$(jpegdir)/include -DHAVE_JPEG
 
 
@@ -202,7 +204,8 @@ krblibs   = $(krb4libs) $(krb5libs)
 #### . If you want to define the default Mosaic documentation directory
 ####   (should be a URL), set -DDOCS_DIRECTORY_DEFAULT=\\\"url\\\"
 #### . Other things you can define are spelled out in src/mosaic.h.
-customflags =
+#### . See src/gui.c for SCROLL_FASTER (seems only needed for linux)
+customflags = -DSCROLL_FASTER
 
 
 
@@ -221,14 +224,27 @@ customflags =
 
 # ---------------------- END OF CUSTOMIZABLE OPTIONS -------------------------
 
-CFLAGS = -g $(sysconfigflags) $(prereleaseflags)
+# Silence warnings we don't care about because we need backwards compat.
+CFLAGS = -g $(sysconfigflags) $(prereleaseflags) -Wno-implicit-function-declaration -Wno-implicit-int -include stdlib.h -Wno-pointer-to-int-cast -Wno-int-to-pointer-cast
+
+# Add libcurl if it exists. Check both /lib and /lib64.
+# NYI
+ifneq ("$(wildcard /lib*/libcurl*)","")
+	CURLLIBS := -lcurl
+	CURLDEFS := -DHAS_CURL
+else
+	CURLDEFS :=
+	CURLLIBS :=
+endif
 
 # Don't worry about these -- for development purposes only.
 PURIFY = purify
 QUANTIFY = quantify
 
-default: $(dtmdirs) libwww2 libXmx libhtmlw libnut src
+# This is the only target that really works, honestly.
+default: src
 	@echo \*\*\* Welcome to NCSA Mosaic.
+
 purifyd: $(dtmdirs) libwww2 libXmx libhtmlw libnut src-purifyd
 	@echo \*\*\* Welcome to Purify'd NCSA Mosaic.
 quantifyd: $(dtmdirs) libwww2 libXmx libhtmlw libnut src-quantifyd
@@ -262,7 +278,10 @@ libnut::
 	@echo --- Building libnut
 	cd libnut; $(MAKE) CC=$(CC) RANLIB=$(RANLIB) CFLAGS="$(CFLAGS) $(knrflag)"
 
-src::
+FORCE:
+
+#src::
+src: FORCE $(dtmdirs) libwww2 libXmx libhtmlw libnut
 	@echo --- Building src
 	cd src; $(MAKE) CC=$(CC) RANLIB=$(RANLIB) LDFLAGS="$(ldflags)" CFLAGS="$(CFLAGS) $(customflags) $(xinc) $(jpegflags) $(dtmflags) $(hdfflags) $(pngflags) $(krbflags) -I.. -I../libXmx -I../libwww2" AUX_CFLAGS=$(knrflag) X_LIBS="$(xlibs)" SYS_LIBS="$(sockslibs) $(syslibs)" DTM_LIBS="$(dtmlibs)" HDF_LIBS="$(hdflibs)" WAIS_LIBS="$(waislibs)" LIBWWW_DIR=../libwww2 JPEG_LIBS="$(jpeglibs)" PNG_LIBS="$(pnglibs)" KRB_LIBS="$(krblibs)" LIBNUT_DIR=../libnut MOSAIC="Mosaic"
 

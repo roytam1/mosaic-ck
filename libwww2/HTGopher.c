@@ -551,7 +551,11 @@ PRIVATE int parse_cso ARGS2 (WWW_CONST char *,	arg,
           *p++ = 0;		/* Terminate line */
           p = line;		/* Scan it to parse it */
 
-	/* OK we now have a line in 'p' lets parse it and print it */
+          /* Break on lines that can't be legal (less than 4 characters) */
+          if (strlen(p) < 4)
+            break;
+
+	  /* OK we now have a line in 'p' lets parse it and print it */
           
           /* Break on line that begins with a 2. It's the end of
            * data.
@@ -564,12 +568,21 @@ PRIVATE int parse_cso ARGS2 (WWW_CONST char *,	arg,
 	   */
           if (*p == '5') {
             START(HTML_H2);
-            PUTS(p+4);
+/* close security hole PUTS(p+4); */
+            write_entity_text(p+4);
             END(HTML_H2);
             break;
           }
 
 	  if(*p == '-') {
+             if (strlen(p) < 5) break; /* can't be valid */
+             if (*(p+1) != '2') { /* this is not a data line */
+                START(HTML_PRE);
+                write_entity_text(p+5);
+                END(HTML_PRE);
+                continue;
+             }
+             
 	     /*  data lines look like  -200:#:
               *  where # is the search result number and can be multiple 
 	      *  digits (infinate?)
@@ -603,7 +616,8 @@ PRIVATE int parse_cso ARGS2 (WWW_CONST char *,	arg,
 		  */
 
                  /* print data */
-                 PUTS(second_colon+1);
+/* close security hole PUTS(second_colon+1); */
+                 write_entity_text(second_colon+1);
                  PUTS("\n");
 
                  if (*(second_colon-1) != last_char)   /* end seperator */

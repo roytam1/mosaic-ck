@@ -40,9 +40,10 @@ sysconfigflags = -O3 -D_BSD -DMOTIF1_2 -DHAVE_ERRLIST -DUSE_STDARG -D__bsdi__
 syslibs = 
 
 #### X include file locations -- if your platform puts the X include
-xinc = -I/Applications/OpenMotif21/include -I/usr/X11/include
-xlibs = -L/Applications/OpenMotif21/lib -L/usr/X11/lib -lXm -lXmu -lXt -lXext -lSM -lICE -lXpm -lX11
-
+xinc = -I$(shell brew --prefix openmotif)/include -I/usr/X11/include
+xlibs = -L$(shell brew --prefix openmotif)/lib -L/usr/X11/lib -lXm -lXmu -lXt -lXext -lSM -lICE -lXpm -lX11
+$(info $(xinc))
+$(info $(xlibs))
 
 #### DTM AND HDF SUPPORT; READ CAREFULLY
 
@@ -74,11 +75,16 @@ xlibs = -L/Applications/OpenMotif21/lib -L/usr/X11/lib -lXm -lXmu -lXt -lXext -l
 #### For inline PNG support, the following should be defined:
 #### The libraries currently used are PNGLIB 0.81 and ZLIB 0.95
 
-pngdir = /usr/local
-pnglibdir = $(pngdir)/lib
-pngincludedir = $(pngdir)/include
-pnglibs = $(pnglibdir)/libpng.a $(pnglibdir)/libz.a -lm
-pngflags =  -I$(pngincludedir) -DHAVE_PNG
+# for this port and others where png.h somewhere else could interfere,
+# define -DLIBPNG12_FORCE and ../libpng12 will be hardcoded
+
+zlibdir = $(shell brew --prefix zlib)/lib
+pngdir = ../libpng12
+# we need another ../ here because the linking occurs in src/
+pnglibdir = ../$(pngdir)/.libs
+pngincludedir = $(pngdir)
+pnglibs = $(pnglibdir)/libpng.a $(zlibdir)/libz.a -lm
+pngflags =  -I$(pngincludedir) -DHAVE_PNG -DLIBPNG12_FORCE
 
 #pngdir = /work2/mosaic-libs/libpng
 #pnglibdir = $(pngdir)
@@ -91,7 +97,7 @@ pngflags =  -I$(pngincludedir) -DHAVE_PNG
 #### For inline JPEG support, the following should be defined:
 #### The library used is Independent JPEG Group (IJG's) 5.0a.
 
-jpegdir = /usr/local
+jpegdir = $(shell brew --prefix libjpeg)
 jpeglibs = $(jpegdir)/lib/libjpeg.a
 jpegflags = -I$(jpegdir) -DHAVE_JPEG
 
