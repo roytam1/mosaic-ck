@@ -1,3 +1,5 @@
+/* Changes for Mosaic-CK (C)2009 Cameron Kaiser */
+
 /****************************************************************************
  * NCSA Mosaic for the X Window System                                      *
  * Software Development Group                                               *
@@ -279,6 +281,7 @@ static XtResource resources[] = {
 /*SWP*/
   { "enableTables", "EnableTables", XtRBoolean, sizeof(Boolean),
       offset(enable_tables), XtRString, "False"},
+
   { "disableMiddleButton", "DisableMiddleButton", XtRBoolean, sizeof(Boolean),
       offset(disableMiddleButton), XtRString, "False"},
 
@@ -371,8 +374,9 @@ static XtResource resources[] = {
   { "splashScreen", "SplashScreen", XtRBoolean, sizeof (Boolean),
       offset (splashScreen), XtRString, "True" },
 
+/* ck */
   { "imageViewInternal", "ImageViewInternal", XtRBoolean, sizeof (Boolean),
-      offset (imageViewInternal), XtRString, "False" },
+      offset (imageViewInternal), XtRString, "True" },
 
   { "urlExpired", "UrlExpired", XtRInt, sizeof (int),
       offset (urlExpired), XtRString, "30" },

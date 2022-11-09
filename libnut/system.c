@@ -1,3 +1,5 @@
+/* Changes for Mosaic-CK Copyright (C)2009 Cameron Kaiser */
+
 /****************************************************************************
  * NCSA Mosaic for the X Window System                                      *
  * Software Development Group                                               *
@@ -101,10 +103,12 @@
 extern char *strdup(char *str);
 #endif
 
-#ifndef VMS
+#ifndef VMS 
+#ifndef HAVE_ERRLIST
 extern int sys_nerr;
 extern char *sys_errlist[];
 extern int errno;
+#endif
 #endif
 
 

@@ -1,3 +1,8 @@
+/* Changes for Mosaic-CK Copyright (C)2009 Cameron Kaiser */
+/* This code had a LOT of horrible security holes in it. I think I have
+   closed most of them, but it should be perused closely by white hats for
+   more. */
+
 /*			GOPHER ACCESS				HTGopher.c
 **			=============
 **
@@ -34,8 +39,11 @@
 #define GOPHER_TN3270           'T'
 
 #define GOPHER_HTML		'h'		/* HTML */
+/* Note: in practice 'w' is totally replaced by hURLs, which are safer */
 #define GOPHER_WWW		'w'		/* W3 address */
 #define GOPHER_SOUND            's'
+
+#define GOPHER_INFO		'i'		/* info line */
 
 #define GOPHER_PLUS_IMAGE       ':'
 #define GOPHER_PLUS_MOVIE       ';'
@@ -110,6 +118,66 @@ PRIVATE char from_hex ARGS1(char, c)
 }
 
 
+/* This function is here to a) handle nonbreaking spaces and b) < > which
+   could be used as the basis of an HTML-injection attack. -- ck */
+
+PRIVATE void write_entity_text ARGS1(WWW_CONST char *,text) {
+	char *k;
+	k = text;
+
+	/* not the most efficient implementation but wth */
+	for(;;) {
+		switch(k[0]) {
+			case '\0':
+				return;
+			case ' ' :
+				PUTS("&nbsp;");
+				break;
+			case '<' :
+				PUTS("&lt;");
+				break;
+			case '>' :
+				PUTS("&gt;");
+				break;
+			default:
+				PUTC(k[0]);
+		}
+		k++;
+	}
+}
+
+/* And *this* function is to substitute '"<> with %-escapes to avoid nasty
+   selector attacks, in the same vein. -- ck */
+
+PRIVATE void write_selector_text ARGS1(WWW_CONST char *,addr) {
+	char *k;
+	k = addr;
+
+	for(;;) {
+		switch(k[0]) {
+			case '\0':
+				return;
+			case '\'':
+				PUTS("%27");
+				break;
+			case '"' :
+				PUTS("%22");
+				break;
+			case '<' :
+				PUTS("%3c");
+				break;
+			case '>' :
+				PUTS("%3e");
+				break;
+			case ' ' :
+				PUTS("%20");
+				break;
+			default:
+				PUTC(k[0]);
+		}
+		k++;
+	}
+}
 
 /*	Paste in an Anchor
 **	------------------
@@ -126,8 +194,10 @@ PRIVATE void write_anchor ARGS3(WWW_CONST char *,text, WWW_CONST char *,addr,
                                 char *, image_text)
 {
     PUTS ("<A HREF=\"");
-    PUTS (addr);
+	/* DO NOT PUTS(addr)! this is exploitable! -- ck */
+    write_selector_text(addr);
     PUTS ("\">");
+    PUTS ("<TT>");
 
     /* Throw in an inlined image, if one has been requested. */
     if (image_text)
@@ -137,7 +207,8 @@ PRIVATE void write_anchor ARGS3(WWW_CONST char *,text, WWW_CONST char *,addr,
         PUTS ("\"> ");
       }
     	    
-    PUTS(text);
+    write_entity_text(text); /* DO NOT PUTS(text)! this is exploitable! -- ck*/
+    PUTS("</TT>");
     PUTS("</A>");
 }
 
@@ -227,11 +298,20 @@ PRIVATE int parse_menu ARGS2 (
 		    } /* host ok */
 		} /* selector ok */
 	    } /* gtype and name ok */
-          
-          if (gtype == GOPHER_WWW) 
+
+/* handle i item type -- ck */
+	if (gtype == GOPHER_INFO || gtype == GOPHER_ERROR) {
+		PUTS("<TT>");
+         	write_entity_text(name);
+		PUTS("</TT><BR>\n");
+
+         } else if (gtype == GOPHER_WWW) 
             {	/* Gopher pointer to W3 */
+/* This is a gaping HTML injection hole and we use hURLs now anyway -- ck
               write_anchor(name, selector, "internal-gopher-text");
+*/
 	    } 
+
           else if (port) 
             {		/* Other types need port */
               if (gtype == GOPHER_TELNET) 
@@ -275,6 +355,9 @@ PRIVATE int parse_menu ARGS2 (
                   strcmp (address, "//:/0") != 0 &&
                   gtype != GOPHER_ERROR)
                 {
+			char *x; /* ck */
+			char *y;
+
                   switch (gtype)
                     {
                     case GOPHER_MENU:
@@ -309,6 +392,40 @@ PRIVATE int parse_menu ARGS2 (
                     case GOPHER_UUENCODED:
                       write_anchor(name, address, "internal-gopher-binary");
                       break;
+
+/* added to parse hURLs -- ck */
+		case GOPHER_HTML:
+
+			y = selector;
+			if (y[0] == '/') *y++; /* mostly for pygopherd */
+			x = strstr(y, "URL:");
+			if (x == NULL || x != y) /* not a hURL */ {
+				x = strstr(selector, "GET ");
+				if (x == NULL || x != selector) /*not a GET*/ {
+/* this will need to account for unsafe mechanisms like javascript
+	but later, since we can't do anything with them. -- ck */
+					write_anchor(name, address, 
+						"internal-gopher-text");
+				} else {
+					/* trailing slash? */
+					*(x += (strlen(x) > 4) ? 5 : 4);
+					/* build a URL, bounds check it */
+					if (strlen(host) + strlen(port) +
+							strlen(x) < 1024) {
+						char y[1024];
+						sprintf(y, "http://%s/%s",
+							host, x); /*has port*/
+						write_anchor(name, y,
+							"internal-gopher-url");
+					} /* silently fail if oversize */
+				}
+			} else {
+				*(x += 4);
+				write_anchor(name, x,
+					"internal-gopher-url");
+			}
+		break;
+			
                     default:
                       write_anchor(name, address, "internal-gopher-unknown");
                       break;
@@ -317,7 +434,10 @@ PRIVATE int parse_menu ARGS2 (
               else
                 {
                   /* Good error handling??? */
+			/* NO! */
+/* this has big potential to be a security hole. -- ck
                   PUTS(line);
+*/
                 }
 	    } 
           else 
@@ -326,7 +446,9 @@ PRIVATE int parse_menu ARGS2 (
               if (www2Trace) fprintf(stderr,
                                  "HTGopher: Bad menu item.\n");
 #endif
+/* this has big potential to be a security hole. -- ck
               PUTS(line);
+*/
 	    } /* parse error */
           p = line;	/* Start again at beginning of line */
         } /* if end of line */

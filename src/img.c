@@ -1,3 +1,5 @@
+/* Changes for Mosaic-CK (C)2009 Cameron Kaiser */
+
 /****************************************************************************
  * NCSA Mosaic for the X Window System                                      *
  * Software Development Group                                               *
@@ -75,6 +77,8 @@ extern int srcTrace;
 #include "bitmaps/gopher_telnet.xbm"
 #include "bitmaps/gopher_binary.xbm"
 #include "bitmaps/gopher_unknown.xbm"
+/* ck */
+#include "bitmaps/gopher_url.xbm"
 
 ImageInfo *scaleImage(ImageInfo *img_data,char *width,char *height);
 
@@ -87,7 +91,8 @@ static ImageInfo *gopher_index = NULL;
 static ImageInfo *gopher_telnet = NULL;
 static ImageInfo *gopher_binary = NULL;
 static ImageInfo *gopher_unknown = NULL;
-
+/* ck */
+static ImageInfo *gopher_url = NULL;
 
 /* for selective image loading */
 #define blank_width 8
@@ -399,6 +404,10 @@ foundit:
         RETURN_IMGINFO_FROM_BITMAP(gopher_binary);
       if (strcmp (src, "internal-gopher-unknown") == 0)
         RETURN_IMGINFO_FROM_BITMAP(gopher_unknown);
+/* ck */
+      if (strcmp (src, "internal-gopher-url") == 0)
+        RETURN_IMGINFO_FROM_BITMAP(gopher_url);
+
     }
 
 #ifdef HAVE_HDF

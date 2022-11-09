@@ -1,10 +1,62 @@
 **** READ ME ****
-The only official architecture I am supporting this on right now is
-powermachten because that's the only arch I need it for. Building this
-on other architectures is with your own hacking, at your own leisure!
-To do that, 
+You must have libz 1.2.3+ (prerequisite for libpng), libjpeg 6b and libpng
+1.2.35+ installed. You must also have Motif of some kind; see below.
+
+As of 2.7ck7, the only targets supported are
 
 	make ppcmt
+		Power MachTen (needs 256MB RAM; see doc page for smaller)
+		Motif is included with Power MachTen.
+
+		Install zlib to /usr(/lib)
+		Install libjpeg to /opt(/lib)
+		Install libpng to /opt(/lib)
+		STATICALLY LINKED ONLY!
+		If you don't know how to do this, see
+			http://www.floodgap.com/retrotech/machten/base.html
+
+		If it bugs out during compilation, rebuild from scratch with
+		a full make clean, or you might get linking errors. Ah, good
+		old buggy MachTen :)
+	make osx
+		>>>> This is what most Mac OS X users will want <<<<
+		Mac OS X (officially 10.4+ but may work as early as 10.2)
+
+		Requires OpenMotif 2.1.31 or higher. Download from
+		http://www.ist-inc.com/DOWNLOADS/motif_download.html
+		install to /usr/OpenMotif (the default)
+
+		Hasn't been tried against the other various versions of
+		Motif. Let me know how that works out for you.
+
+		Install libz, libpng and libjpeg to /usr/local(/lib)
+		The .a's, not the dynamic/shlibs!
+	make uosx
+		Same, but makes a Universal Binary. This REQUIRES that your
+		static libraries be compiled universal! Most people will not
+		want this and is only for my use to make the UB Mosaic build.
+		Use regular make osx unless you know exactly what you're doing.
+
+You will get a crapload of warnings and frankly that will probably be very
+hard to eliminate completely because of the diversity of compiler enviroments
+supported.
+
+Building this on other architectures is with your own hacking, at your own
+leisure! See the main page for my patches policy, but in short, any patch
+you make that requires ruining compatibility for either of these systems
+WILL NOT BE ACCEPTED.
+
+Because of issues with autoconf on certain older OSes, the plans below to
+migrate the Makefile system to autoconf are currently not going to happen.
+Make a Makefile, work with that. You should do this in the makefiles/
+directory, and hook up its targets to the main Makefile in the root directory.
+
+If you have a reasonably recent gcc, try the osx option, since this is more
+specific to gcc 3+ than it is Mac OS X. You still need OpenMotif installed,
+plus the other prerequisites, and until I deal more with this you probably
+should build it statically linked unless you know what you're doing.
+
+DO NOT CONTACT NCSA for support with this version.
 
 Cameron Kaiser
 

@@ -1,3 +1,5 @@
+/* Changes for Mosaic-CK Copyright (C)2009 Cameron Kaiser */
+
 /****************************************************************************
  * NCSA Mosaic for the X Window System                                      *
  * Software Development Group                                               *

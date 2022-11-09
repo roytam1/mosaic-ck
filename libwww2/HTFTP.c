@@ -1496,7 +1496,7 @@ char szTime[32];
 
 			t=time(0);
 			ptr=localtime(&t);
-			sprintf(szYear,"%d",1900+ptr->tm_year);
+			sprintf(szYear,"%d",1900+(ptr->tm_year));
 			sprintf(szDate, "%*s%9s %s %s %s %2.2s, %s", nSpaces, " ", itemsize, szFileInfo, szTime, szMonth, szDay, szYear); 
 		}
 		else if (nTime == 0) {

@@ -1,3 +1,5 @@
+/* Changes for Mosaic-CK Copyright(C) 2009 Cameron Kaiser */
+
 /****************************************************************************
  * NCSA Mosaic for the X Window System                                      *
  * Software Development Group                                               *
@@ -585,7 +587,7 @@ struct Connection *con;
 	XtRemoveInput(*inputID);
 */
 
-	MCCISendResponseLine(client,MCCIR_OK,"VERSION 01 X Mosaic 2.7ck6");
+	MCCISendResponseLine(client,MCCIR_OK,"VERSION 01 X Mosaic 2.7ck7");
 
 	con = (struct Connection *) malloc(sizeof(struct Connection));
 	con->client = client;

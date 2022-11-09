@@ -1,3 +1,5 @@
+/* Changes for Mosaic-CK Copyright (C)2009 Cameron Kaiser */
+
 /****************************************************************************
  * NCSA Mosaic for the X Window System                                      *
  * Software Development Group                                               *
@@ -3559,7 +3561,7 @@ static mo_window *mo_make_window (Widget parent, mo_window *parentw)
   Atom WM_DELETE_WINDOW;
   char buf[80];
 
-  sprintf(pre_title,"NCSA X Mosaic %s",MO_VERSION_STRING);
+  sprintf(pre_title,"Floodgap X Mosaic-CK %s",MO_VERSION_STRING);
   sprintf(buf,"%s: ",pre_title);
   XmxSetArg (XmNtitle, (long)buf);
   XmxSetArg (XmNiconName, (long)"Mosaic");
@@ -3809,6 +3811,8 @@ static XmxCallback (fire_er_up)
   if ((home_opt = getenv ("WWW_HOME")) != NULL)
     home_document = home_opt;
 
+/* sigh -- ck */
+#undef PRERELEASE
 #ifdef PRERELEASE
   /*
    * If this is a pre-release, go to the help-on-version doc for three

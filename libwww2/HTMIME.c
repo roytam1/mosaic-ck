@@ -1,3 +1,5 @@
+/* Changes for Mosaic-CK Copyright (C) 2009 Cameron Kaiser */
+
 /*			MIME Message Parse			HTMIME.c
 **			==================
 **
@@ -574,9 +576,9 @@ PRIVATE void HTMIME_put_character ARGS2(HTStream *, me, char, c)
                 char *tmp;
                 for (tmp = me->value; *tmp; tmp++)
                   *tmp = TOLOWER (*tmp);
-		/* Fix character set by ignoring it */
+	/* fix character set problem by ignoring any charset value -- ck */
 		if (tmp = strchr(me->value, ';')) {
-			*tmp = '\0';
+			*tmp = '\0'; /* just cut the string there */
 		}
               }
 #ifndef DISABLE_TRACE

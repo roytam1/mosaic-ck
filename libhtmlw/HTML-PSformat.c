@@ -1,3 +1,5 @@
+/* Changes for Mosaic-CK Copyright (C)2009 Cameron Kaiser */
+
 /* HTML-PSformat.c -  Module for NCSA's Mosaic software
  *
  * Purpose:	to parse Hypertext widget contents into appropriate PostScript
@@ -59,7 +61,11 @@
  *
  */
 #include "../config.h"
+#ifndef USE_STDARG
 #include <varargs.h>
+#else
+#include <stdarg.h>
+#endif
 
 #include <string.h>
 #include <stdio.h>
@@ -229,10 +235,15 @@ GetDpi(HTMLWidget hw)
  *
  */
 static int 
+#ifndef USE_STDARG
 PSprintf(format, va_alist)
     char* format;
     va_dcl
 {
+#else
+PSprintf(char *format, ...)
+{
+#endif
     int 	len;
     char 	*s;
     va_list	args;
@@ -251,7 +262,11 @@ PSprintf(format, va_alist)
 	}
 	PS_string = s;
     }
+#ifndef USE_STDARG
     va_start(args);
+#else
+    va_start(args, format);
+#endif
     len = vsprintf(PS_string+PS_len, format, args);
     /* this is a hack to make it work on systems were vsprintf(s,...)
      * returns s, instead of the len.

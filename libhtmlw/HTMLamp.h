@@ -1,3 +1,5 @@
+/* Eventually this is going to need to be Unicode. -- ck */
+
 /****************************************************************************
  * NCSA Mosaic for the X Window System                                      *
  * Software Development Group                                               *

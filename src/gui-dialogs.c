@@ -1,3 +1,5 @@
+/* Changes for Mosaic-CK Copyright (C)2009 Cameron Kaiser */
+
 /****************************************************************************
  * NCSA Mosaic for the X Window System                                      *
  * Software Development Group                                               *
@@ -87,9 +89,11 @@ extern int is_uncompressed;
 
 /*swp -- for ~ expansion*/
 #include <pwd.h>
+#ifndef HAVE_ERRLIST
 extern int sys_nerr;
 extern char *sys_errlist[];
 extern int errno;
+#endif
 #define __MAX_HOME_LEN__ 256
 int pathEval(char *dest, char *src);
 char *getFileName(char *file_src);

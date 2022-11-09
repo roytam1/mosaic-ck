@@ -1,3 +1,5 @@
+/* Changes for Mosaic-CK (C)2009 Cameron Kaiser */
+
 /****************************************************************************
  * NCSA Mosaic for the X Window System                                      *
  * Software Development Group                                               *
@@ -187,6 +189,10 @@ static int Subscript;
 static XFontStruct *nonScriptFont;
 static int InDocHead;
 static int InUnderlined;
+
+/* ck */
+static int InScript;
+static int InStyleSheet;
 
 /*
  * Turned out we were taking WAY too much time mallocing and freeing
@@ -3458,6 +3464,31 @@ TriggerMarkChanges(hw, mptr, x, y)
 		InDocHead = 0;
 	      }
 	
+	/* handle <script> and other block-ignore tags at this level  -- ck */
+	if (type == M_SCRIPT) {
+		if (mark->is_end) {
+			InScript = 0;
+			/* just ignore them right now. we can't really
+				use them anyway */
+			Ignore = 0;
+		} else {
+			InScript = 1;
+			Ignore = 1;
+		}
+	}
+
+	if (type == M_STYLESHEET) {
+		if (mark->is_end) {
+			InStyleSheet = 0;
+			/* ignore for now, might have a primitive parser
+				here later for CSS body/text colours, etc. */
+			Ignore = 0;
+		} else {
+			InStyleSheet = 1;
+			Ignore = 1;
+		}
+	}
+
 	/*
 	 * If Ignore is set, we ignore all further elements until we get to the
 	 * end of the Ignore
@@ -3474,6 +3505,8 @@ TriggerMarkChanges(hw, mptr, x, y)
 	{
 		        return;
 	}
+
+/* text formatting -- ADD NEW HTML TAGS HERE ck */
 
 	switch(type)
 	{
@@ -3681,6 +3714,11 @@ TriggerMarkChanges(hw, mptr, x, y)
 			else
 			{
 			        InDocHead = 0;   /* end <head> section */
+
+				/* small kludges for bad code -- ck */
+				InScript = 0;
+				InStyleSheet = 0;
+
 				Ignore = 0;
 			}
 			break;
@@ -5950,6 +5988,7 @@ PlaceLine(hw, line)
 	{
 		switch(eptr->type)
 		{
+/* this is the dispatch for types of tags (see HTMLparse.c for HTMLParse) */
 			case E_TEXT:
 			        TextRefresh(hw, eptr,
 					    0, (eptr->edata_len - 2));

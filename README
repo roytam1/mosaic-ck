@@ -1,8 +1,13 @@
-***** THIS IS MOSAIC 2.7ck6 *****
+***** THIS IS MOSAIC 2.7ck7 *****
 This is a hacked version of Mosaic 2.7b5 adjusted for my own personal use and
 to function decently well in today's WWW environment. It is not supported
 by NCSA or UIUC, and arguably I don't support it either, so don't send me
 patches unless you ask first. YOU USE IT AT YOUR OWN RISK. EAT YOUR VEGETABLES. 
+
+For specific installation notes, see INSTALL for supported architectures
+and prerequisites. The below applies only generally to 2.7ck* and is included
+for historical purposes only.
+
 -- Cameron Kaiser
 
 

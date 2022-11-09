@@ -262,9 +262,15 @@ PUBLIC int HTLoadHTTP ARGS4 (
     /*
      * For a gateway, the beginning '/' on the request must
      * be stripped before appending to the gateway address.
+fixed for HTTP proxies -- ck
      */
     if ((using_gateway)||(using_proxy)) {
         strcat(command, p1+1);
+/*
+	strcat(command, arg);
+	strcat(command, "http:");
+	strcat(command, p1);
+*/
     }
     else
         strcat(command, p1);

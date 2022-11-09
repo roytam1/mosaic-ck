@@ -191,6 +191,7 @@ PRIVATE int get_physical ARGS3(
 		gateway = (char *)getenv(gateway_parameter); /* coerce for decstation */
 
 		/* search for proxy servers */
+		/* http_proxy search goes here -- ck*/
 		strcpy(gateway_parameter, tmp_access);
 		strcat(gateway_parameter, "_proxy");
 		proxy = (char *)getenv(gateway_parameter);
@@ -239,6 +240,15 @@ PRIVATE int get_physical ARGS3(
 		/* proxy servers have precedence over gateway servers */
 		if (proxy) {
 			char * gatewayed;
+
+		/* fix proxy if it doesn't have / at the end. -- ck */
+			char *y;
+			char *z;
+
+			y = strrchr(proxy, '/');
+			z = strrchr(proxy, '\0');
+			if (++y != z) /* ewww but efficient */
+				strcat(proxy, "/");
 
 			gatewayed = NULL;
 			StrAllocCopy(gatewayed,proxy);

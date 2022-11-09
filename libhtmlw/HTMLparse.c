@@ -1,3 +1,5 @@
+/* Changes for Mosaic-CK (C)2009 Cameron Kaiser */
+
 /****************************************************************************
  * NCSA Mosaic for the X Window System                                      *
  * Software Development Group                                               *
@@ -1403,6 +1405,15 @@ ParseMarkType(str)
 	{
 		type=M_MAP;
 	}
+/* ck */
+	else if (caseless_equal(str, MT_SCRIPT)) {
+		type = M_SCRIPT;
+	} else if (caseless_equal(str, MT_STYLESHEET)) {
+		type = M_STYLESHEET;
+	}
+
+/* ADD NEW HTML TAGS HERE ck */
+
 	else
 	{
 #ifndef DISABLE_TRACE

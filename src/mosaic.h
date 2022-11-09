@@ -1,3 +1,5 @@
+/* Changes for Mosaic-CK (C)2009 Cameron Kaiser */
+
 /****************************************************************************
  * NCSA Mosaic for the X Window System                                      *
  * Software Development Group                                               *
@@ -120,15 +122,15 @@ typedef enum
 /* -------------------------------- MACROS -------------------------------- */
 /* ------------------------------------------------------------------------ */
 
-#define MO_VERSION_STRING "2.7ck6"
+#define MO_VERSION_STRING "2.7ck7"
 #define MO_GO_NCSA_COUNT 3  /* Go to the NCSA home page thrice*/
 #define MO_HELP_ON_VERSION_DOCUMENT \
-  mo_assemble_help_url ("2.7ck6.html")
-#define MO_DEVELOPER_ADDRESS "mosaic-x@ncsa.uiuc.edu"
+  mo_assemble_help_url ("2.7ck7.html")
+#define MO_DEVELOPER_ADDRESS "ckaiser@floodgap.com"
 
 #ifndef DOCS_DIRECTORY_DEFAULT
 #define DOCS_DIRECTORY_DEFAULT \
-  "http://www.floodgap.com/retrotech/machten/mosaic"
+  "http://www.floodgap.com/retrotech/machten/mosaic/manuserv?"
 #endif
 
 #ifndef HOME_PAGE_DEFAULT
@@ -182,6 +184,9 @@ typedef enum
 
 #if defined(__MACHTEN__)
 #define MO_MACHINE_TYPE "PowerMachTen"
+#endif
+#if defined(__darwin__) || defined(__APPLE__)
+#define MO_MACHINE_TYPE "Mac OS X"
 #endif
 #if defined(bsdi)
 #define MO_MACHINE_TYPE "BSD/OS"

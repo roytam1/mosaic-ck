@@ -1,3 +1,5 @@
+/* Changes for Mosaic-CK (C)2009 Cameron Kaiser */
+
 /****************************************************************************
  * NCSA Mosaic for the X Window System                                      *
  * Software Development Group                                               *
@@ -377,6 +379,8 @@ struct delay_rec {
  * parsed object list.
  */
 
+/* ADD NEW HTML TAGS HERE! -- CK */
+
 /* Mark types */
 #define	M_UNKNOWN	-1
 #define	M_NONE		0
@@ -439,6 +443,9 @@ struct delay_rec {
 #define M_FRAME		57
 #define M_MAP		58 /* swp - client side ismap */
 #define M_AREA		59 /* swp - client side ismap */
+/* ck */
+#define M_SCRIPT	60
+#define M_STYLESHEET	61
 
 /* syntax of Mark types */
 #define	MT_TITLE	"title"
@@ -499,6 +506,8 @@ struct delay_rec {
 #define MT_FRAME	"frame"
 #define MT_MAP		"map" /* swp - client side ismap */
 #define MT_AREA		"area" /* swp - client side ismap */
+#define MT_SCRIPT	"script"
+#define MT_STYLESHEET	"style"
 
 /* anchor tags */
 #define	AT_NAME		"name"

@@ -4,6 +4,8 @@
 
 ##
 ## Scott Powers
+## Cameron Kaiser
+## and a cast of probably two or three people
 ##
 
 all: dev_$(DEV_ARCH)
@@ -15,7 +17,10 @@ dev_::
 	@echo "[DEV_ARCH] to one of the following:"
 	@echo "-- CURRENTLY SUPPORTED --"
 	@echo "  ppcmt -- PowerPC running Power MachTen 4.1.4 or higher"
-	@echo "-- ARCHIVAL --"
+	@echo "  osx -- Mac OS X 10.4+ (earlier possible but unsupported)"
+	@echo "-- USE SOMETHING ELSE UNLESS YOU KNOW WHAT YOU'RE DOING --"
+	@echo "  uosx -- Universal Binary Mac OS X 10.4+"
+	@echo "-- ARCHIVAL (AT YOUR OWN RISK) --"
 	@echo "  alpha -- DEC Alpha AXP running OSF/1"
 	@echo "  bsdi -- x86 running BSDI BSD/OS 2.1"
 	@echo "  dec -- DEC 2100 running Ultrix 4.3"
@@ -34,11 +39,11 @@ dev_::
 	@echo "  sun-lresolv -- SPARCserver 690MP running SunOS 4.1.3"
 	@echo " "
 	@echo "To make a Purify or Quantify version of Mosaic, put a 'p_' or"
-	@echo "  'q_' in front of the platform."
+	@echo "  'q_' in front of the platform. (NOT SUPPORTED EITHER)"
 	@echo "If your OS is not listed, you will need to copy one of the"
 	@echo "  the Makefiles.OS in the 'makefiles' directory, edit it for"
 	@echo "  your system, edit this Makefile to add your system, compile,"
-	@echo "  and send in your changes to: mosaic-x@ncsa.uiuc.edu."
+	@echo "  and send in your changes to: ckaiser@floodgap.com."
 
 purifyd:
 	$(MAKE) p_$(DEV_ARCH)
@@ -50,13 +55,23 @@ rm_and_touch:
 	@rm -f config.h
 	@touch config.h
 
-dev_alpha: rm_and_touch alpha
-alpha: rm_and_touch
-	$(MAKE) -f makefiles/Makefile.alpha DEV_ARCH=alpha
-p_alpha: rm_and_touch
-	$(MAKE) -f makefiles/Makefile.alpha purifyd DEV_ARCH=alpha
-q_alpha: rm_and_touch
-	$(MAKE) -f makefiles/Makefile.alpha quantifyd DEV_ARCH=alpha
+####### THESE ARE THE SUPPORTED TARGETS! #######
+
+dev_uosx: rm_and_touch uosx
+uosx: rm_and_touch
+	$(MAKE) -f makefiles/Makefile.uosx DEV_ARCH=uosx
+p_uosx: rm_and_touch
+	$(MAKE) -f makefiles/Makefile.uosx purifyd DEV_ARCH=uosx
+q_uosx: rm_and_touch
+	$(MAKE) -f makefiles/Makefile.uosx quantifyd DEV_ARCH=uosx
+
+dev_osx: rm_and_touch osx
+osx: rm_and_touch
+	$(MAKE) -f makefiles/Makefile.osx DEV_ARCH=osx
+p_osx: rm_and_touch
+	$(MAKE) -f makefiles/Makefile.osx purifyd DEV_ARCH=osx
+q_osx: rm_and_touch
+	$(MAKE) -f makefiles/Makefile.osx quantifyd DEV_ARCH=osx
 
 dev_ppcmt: rm_and_touch ppcmt
 ppcmt: rm_and_touch
@@ -65,6 +80,16 @@ p_ppcmt: rm_and_touch
 	$(MAKE) -f makefiles/Makefile.ppcmt purifyd DEV_ARCH=ppcmt
 q_ppcmt: rm_and_touch
 	$(MAKE) -f makefiles/Makefile.ppcmt quantifyd DEV_ARCH=ppcmt
+
+####### THESE ARE NOT! #######
+
+dev_alpha: rm_and_touch alpha
+alpha: rm_and_touch
+	$(MAKE) -f makefiles/Makefile.alpha DEV_ARCH=alpha
+p_alpha: rm_and_touch
+	$(MAKE) -f makefiles/Makefile.alpha purifyd DEV_ARCH=alpha
+q_alpha: rm_and_touch
+	$(MAKE) -f makefiles/Makefile.alpha quantifyd DEV_ARCH=alpha
 
 dev_bsdi: rm_and_touch bsdi
 bsdi: rm_and_touch
@@ -195,3 +220,9 @@ clean:
 	cd libwww2; $(MAKE) clean
 	cd src; $(MAKE) clean MOSAIC="Mosaic"
 	@echo "Done cleaning..."
+
+dist: clean targz
+
+targz:
+	cd .. ; rm -f mosaic27ck7.tar* ; tar cvf mosaic27ck7.tar mosaic27ck7 ; gzip mosaic27ck7.tar
+
