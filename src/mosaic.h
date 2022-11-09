@@ -1,4 +1,6 @@
-/* Changes for Mosaic-CK (C)2009 Cameron Kaiser */
+/* Changes for Mosaic-CK (C)2009-10 Cameron Kaiser */
+
+#include "MOSAIC_VERSION.h"
 
 /****************************************************************************
  * NCSA Mosaic for the X Window System                                      *
@@ -122,10 +124,10 @@ typedef enum
 /* -------------------------------- MACROS -------------------------------- */
 /* ------------------------------------------------------------------------ */
 
-#define MO_VERSION_STRING "2.7ck7"
+/* #define MO_VERSION_STRING "2.7ck8" */ /* This is now in MOSAIC_VERSION.h */
 #define MO_GO_NCSA_COUNT 3  /* Go to the NCSA home page thrice*/
 #define MO_HELP_ON_VERSION_DOCUMENT \
-  mo_assemble_help_url ("2.7ck7.html")
+  mo_assemble_help_url (MO_VERSION_STRING".html")
 #define MO_DEVELOPER_ADDRESS "ckaiser@floodgap.com"
 
 #ifndef DOCS_DIRECTORY_DEFAULT
@@ -548,6 +550,10 @@ typedef struct mo_window
   int agent_state;
   Boolean have_focus;
 
+/* Mosaic-CK */
+  Boolean progressive_rendering;
+  Boolean classic_renderer;
+
 } mo_window;
 
 /* ------------------------------- mo_node -------------------------------- */
@@ -671,6 +677,9 @@ typedef enum
 
 /* Password cash stuff */
   mo_clear_passwd_cache,
+
+/* Mosaic-CK additions */
+  mo_progressive_rendering, mo_classic_renderer_inverse,
 
 /* NOTE!!!!!! THIS MUST ALWAYS BE LAST!!!!!! */
   mo_last_entry

@@ -6,8 +6,8 @@
 
 #define HTTP_VERSION	"HTTP/1.0"
 
-#define INIT_LINE_SIZE		1024	/* Start with line buffer this big */
-#define LINE_EXTEND_THRESH	256	/* Minimum read size */
+#define INIT_LINE_SIZE		16384	/* Start with line buffer this big */
+#define LINE_EXTEND_THRESH	1024	/* Minimum read size */
 #define VERSION_LENGTH 		20	/* for returned protocol version */
 
 #include "HTParse.h"
@@ -127,6 +127,8 @@ PUBLIC int HTLoadHTTP ARGS4 (
   int i;
   int keepingalive = 0;
   char *p;
+
+  int http11; /* CK */
 
 /*SWP*/
   int statusError=0;
@@ -755,6 +757,8 @@ fixed for HTTP proxies -- ck
 	/*SWP*/
 	statusError=0;
 
+    http11 = 0;
+
     server_version[0] = 0;
     
     fields = sscanf(line_buffer, "%20s %d",
@@ -789,6 +793,11 @@ fixed for HTTP proxies -- ck
       } 
     else 
       {
+
+	/* Detect HTTP/1.1 responses even if we get them in error. */
+	if (server_version[7] == '1') {
+		http11 = 1;
+	}
         /* Decode full HTTP response */
         format_in = HTAtom_for("www/mime");
         /* We set start_of_data to "" when !eol here because there
@@ -806,6 +815,7 @@ fixed for HTTP proxies -- ck
         switch (server_status / 100) 
           {
           case 3:		/* Various forms of redirection */
+/* SOMEDAY: Implement 304 */
             /* We now support this in the parser, at least. */
             doing_redirect = 1;
             break;
@@ -911,6 +921,8 @@ fixed for HTTP proxies -- ck
 
   if (!return_nothing)
     {
+	int adv; /* needed for unofficial support below */
+
 #ifndef DISABLE_TRACE
       if (www2Trace)
         fprintf (stderr, "HTTP: Doing put_block, '%s'\n", start_of_data);
@@ -931,13 +943,22 @@ fixed for HTTP proxies -- ck
 #endif
 	}
 */
-		if(*p=='K' && !strncmp("Keep-Alive:",p,11)){
+		/* This doesn't work right yet. */
+		adv = 0;
+		if(
+/*
+			http11 ||
+		   (*p=='K' && (adv=10) && !strncasecmp("Keep-Alive:",p,11)) ||
+		   (*p=='C' && (adv=21) &&
+				!strncasecmp("Connection: Keep-Alive",p,22)) ||
+*/
+			0) {
 #ifndef DISABLE_TRACE
 			if (www2Trace)
 				fprintf (stderr, "HTTP: Server Agrees to Keep-Alive\n");
 #endif
 			lsocket = s;
-			p+=10;
+			p+=adv;
 		}
 	}
 

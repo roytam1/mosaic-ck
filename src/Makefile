@@ -60,7 +60,7 @@ $(MOSAIC): $(OBJS) $(AUXOBJS) $(HDFOBJS) $(PROGRAM_LIBS) $(DTM_LIBS)
 wipe:
 	-rm -f Mosaic Mosaic-p Mosaic-q $(OBJS) core
 clean:
-	-rm -f Mosaic Mosaic-p Mosaic-q *.o core Mosaic.xcoff
+	-rm -f Mosaic Mosaic-p Mosaic-q *.o core Mosaic.xcoff Mosaic.gz
 tags:
 	etags -t *.[ch]
 

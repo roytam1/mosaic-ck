@@ -587,7 +587,7 @@ struct Connection *con;
 	XtRemoveInput(*inputID);
 */
 
-	MCCISendResponseLine(client,MCCIR_OK,"VERSION 01 X Mosaic 2.7ck7");
+	MCCISendResponseLine(client,MCCIR_OK,"VERSION 01 X Mosaic "MO_VERSION_STRING);
 
 	con = (struct Connection *) malloc(sizeof(struct Connection));
 	con->client = client;

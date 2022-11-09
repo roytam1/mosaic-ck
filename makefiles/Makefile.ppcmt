@@ -33,7 +33,7 @@ knrflag =
 #### For Convex whatever, do -DCONVEX
 #### For SCO ODT 3.0, do -DSCO -DSVR4 -DMOTIF1_2
 #### For Motorola SVR4, do -DSVR4 -DMOTOROLA -DMOTIF1_2
-sysconfigflags = -DMOTIF1_2
+sysconfigflags = -O3 -DMOTIF1_2
 
 #### System libraries.
 syslibs = #-lipc

@@ -85,6 +85,10 @@
 extern int tableSupportEnabled;
 extern int imageViewInternal;
 
+/* Mosaic-CK */
+extern int classicRenderer;
+extern int progressiveRendering;
+
 /* SWP -- Spoof Agents Stuff */
 extern int selectedAgent;
 extern int numAgents;
@@ -828,6 +832,11 @@ XmxCallback (menubar_cb)
 
       */
           /*SWP*/
+    case mo_classic_renderer_inverse:
+      classicRenderer = win->classic_renderer =
+	(win->classic_renderer ? 0 : 1);
+      mo_reload_window_text (win, 0);
+      break;
     case mo_table_support:
       tableSupportEnabled = win->table_support = (win->table_support ? 0 : 1);
       break;
@@ -881,6 +890,11 @@ XmxCallback (menubar_cb)
       break;
     case mo_image_view_internal:
       imageViewInternal = win->image_view_internal = (win->image_view_internal ? 0 : 1);
+      break;
+    case mo_progressive_rendering:
+      progressiveRendering = win->progressive_rendering =
+	(win->progressive_rendering ? 0 : 1);
+      XmxSetValues (win->scrolled_win);
       break;
     case mo_large_fonts:
       if (cci_event) MoCCISendEventOutput(OPTIONS_FONTS_TL);
@@ -1582,18 +1596,20 @@ char buf[BUFSIZ];
 	NULL_MENUBAR()
 
 	/* Options Menu */
-	ALLOC_MENUBAR(opts_menuspec,23)
+	ALLOC_MENUBAR(opts_menuspec,25)
 /*	DEFINE_MENUBAR("#Fancy Selections" ,"S",menubar_cb,mo_fancy_selections,NULL)
 	SPACER()
         */
 	DEFINE_MENUBAR("#Load to Local Disk" ,"T",menubar_cb,mo_binary_transfer,NULL)
 	SPACER()
+	DEFINE_MENUBAR("#Use Classic Renderer", "c", menubar_cb,mo_classic_renderer_inverse,NULL)
 	DEFINE_MENUBAR("#Table Support" ,"b",menubar_cb,mo_table_support,NULL)
 	SPACER()
 	DEFINE_MENUBAR("#Body Color" ,"y",menubar_cb,mo_body_color,NULL)
 	DEFINE_MENUBAR("#Body (Background) Images" ,"k",menubar_cb,mo_body_images,NULL)
 	SPACER()
 	DEFINE_MENUBAR("#View Images Internally" ,"V",menubar_cb,mo_image_view_internal,NULL)
+	DEFINE_MENUBAR("#Progressive Rendering", "r",menubar_cb,mo_progressive_rendering,NULL)
 	DEFINE_MENUBAR("#Delay Image Loading" ,"D",menubar_cb,mo_delay_image_loads,NULL)
 	DEFINE_MENUBAR("Load Images In Current" ,"L",menubar_cb,mo_expand_images_current,NULL)
 	SPACER()
@@ -1634,7 +1650,7 @@ char buf[BUFSIZ];
 	DEFINE_MENUBAR("What's New..." ,"W",menubar_cb,mo_whats_new,NULL)
 	DEFINE_MENUBAR("Demo..." ,"D",menubar_cb,mo_mosaic_demopage,NULL)
 	SPACER()
-	DEFINE_MENUBAR("Help on Version 2.7ck7..." ,"V",menubar_cb,mo_help_onversion,NULL)
+	DEFINE_MENUBAR("Help on Version "MO_VERSION_STRING"..." ,"V",menubar_cb,mo_help_onversion,NULL)
 	DEFINE_MENUBAR("On Window..." ,"O",menubar_cb,mo_help_onwindow,NULL)
 	DEFINE_MENUBAR("On FAQ..." ,"F",menubar_cb,mo_help_faq,NULL)
 	SPACER()

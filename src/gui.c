@@ -213,6 +213,14 @@ char **imagedelay_sites = NULL;
 char **imagekill_sites = NULL;
 Boolean currently_delaying_images = 0;
 
+/* for progressive rendering */
+
+Boolean progressive_rendering = 0;
+
+/* for improved renderer */
+
+Boolean classic_renderer = 0;
+
 /*******************************/
 
 /* Because Sun cripples the keysym.h file. */
@@ -308,6 +316,12 @@ int twirl_increment;
 extern int sendAgent;
 extern int sendReferer;
 extern int imageViewInternal;
+
+/* Mosaic-CK */
+/*extern*/
+int progressiveRendering;
+/*extern*/
+int classicRenderer;
 
 extern int do_comment;
 
@@ -3295,6 +3309,17 @@ void mo_sync_windows(mo_window *win, mo_window *parent)
     tableSupportEnabled = win->table_support = parent->table_support;
     XmxRSetToggleState (win->menubar, mo_table_support,
                         win->table_support ? XmxSet : XmxNotSet);
+
+/* Mosaic-CK */
+    progressiveRendering = win->progressive_rendering =
+	parent->progressive_rendering;
+    XmxRSetToggleState (win->menubar, mo_progressive_rendering,
+			(win->progressive_rendering ? XmxSet : XmxNotSet));
+	/* WbNdelayImageLoads set below */
+    classicRenderer = win->classic_renderer =
+	parent->classic_renderer;
+    XmxRSetToggleState (win->menubar, mo_classic_renderer_inverse,
+			(win->classic_renderer ? XmxSet : XmxNotSet));
     
     win->body_color = parent->body_color;
     XtVaSetValues(win->scrolled_win,
@@ -3476,6 +3501,14 @@ static mo_window *mo_open_window_internal (Widget base, mo_window *parent)
   imageViewInternal = win->image_view_internal = get_pref_boolean(eIMAGEVIEWINTERNAL);
   XmxRSetToggleState (win->menubar, mo_image_view_internal,
                       (win->image_view_internal ? XmxSet : XmxNotSet));
+
+  classicRenderer = win->classic_renderer = get_pref_boolean(eBETTER_RENDERER);
+  XmxRSetToggleState (win->menubar, mo_classic_renderer_inverse,
+			(win->classic_renderer ? XmxSet : XmxNotSet));
+  progressiveRendering = win->progressive_rendering =
+	get_pref_boolean(ePROGRESSIVE_RENDERING);
+  XmxRSetToggleState (win->menubar, mo_progressive_rendering,
+			(win->progressive_rendering ? XmxSet : XmxNotSet));
 
   /* take care of session history for rbm */
 

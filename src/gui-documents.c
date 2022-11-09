@@ -110,6 +110,15 @@ static mo_status mo_post_load_window_text (mo_window *win, char *url,
 /* for selective image loading */
 extern char **imagedelay_sites;
 extern Boolean currently_delaying_images;
+
+/* for progressive rendering */
+
+extern Boolean progressive_rendering;
+
+/* for updated renderer */
+
+extern Boolean classic_renderer;
+
 /*******************************/
 
 
@@ -358,6 +367,10 @@ mo_status mo_do_window_text (mo_window *win, char *url, char *txt,
             did_we_image_delay = 1;
         }
     }
+
+   progressive_rendering = win->progressive_rendering;
+   classic_renderer = win->classic_renderer;
+
 /************************************/
 /* send document over cci if needed */
  if (txt != NULL)

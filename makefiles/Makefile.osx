@@ -33,7 +33,7 @@ knrflag =
 #### For Convex whatever, do -DCONVEX
 #### For SCO ODT 3.0, do -DSCO -DSVR4 -DMOTIF1_2
 #### For Motorola SVR4, do -DSVR4 -DMOTOROLA -DMOTIF1_2
-sysconfigflags = -D_BSD -DMOTIF1_2 -DHAVE_ERRLIST -DUSE_STDARG -D__bsdi__
+sysconfigflags = -O3 -D_BSD -DMOTIF1_2 -DHAVE_ERRLIST -DUSE_STDARG -D__bsdi__
 
 #### System libraries.
 # -lipc

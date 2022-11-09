@@ -1,4 +1,4 @@
-/* Changes for Mosaic-CK (C)2009 Cameron Kaiser */
+/* Changes for Mosaic-CK (C)2009, 2010 Cameron Kaiser */
 
 /****************************************************************************
  * NCSA Mosaic for the X Window System                                      *
@@ -70,6 +70,7 @@ struct timezone Tz;
 #endif
 #include "HTML.h"
 #include "HTMLamp.h"
+#include "HTMLutf8.h"
 
 
 extern void FreeObjList();
@@ -81,6 +82,9 @@ int NoBodyImages(Widget w);
 char *ParseMarkTag();
 
 extern int tableSupportEnabled;
+
+/* for upgraded rendering */
+extern Boolean classic_renderer;
 
 #ifndef DISABLE_TRACE
 extern int htmlwTrace;
@@ -283,6 +287,12 @@ clean_white_space(txt)
  *	0: terminated with a ';'
  *	1: unterminated
  *	2: terminated with whitespace
+ * Cameron adds:
+ * If we are not using the classic renderer, then we also need to contend
+ * with converting certain &#xxx; sequences into a 7-bit space, and convert
+ * high-bit-set (i.e., UTF-8) sequences into the same. I was considering 
+ * making it do that always, but I think it's more educational to remind
+ * people that Unicode/UTF-8 doesn't come for free.
  */
 char
 ExpandEscapes(esc, endp, termination)
@@ -293,11 +303,72 @@ ExpandEscapes(esc, endp, termination)
 	int cnt;
 	char val;
 	int unterminated;
+	int second_time_thru;
 
 	unterminated = (termination & 0x01);
+	second_time_thru = 0;
 
+/* First check for UTF-8 sequences. In this case, the first character will
+   have the high-bit set. If it does, then use the UTF-8 -> 7-bit table for
+   translation. If no appropriate match is found, emit the sequence "raw"
+   and exit. This is a simpler version of the amp-matcher below. - Cameron */
+
+	if (!classic_renderer && (*esc & 192)) {
+		int escLen, ampLen;
+
+		escLen = strlen(esc);	
+		cnt = 0;
+		while (UTF8Escapes[cnt].tag != NULL)
+		{
+			ampLen = strlen(UTF8Escapes[cnt].tag);
+			if (escLen == ampLen) {
+				/* We can't trust strncmp to do this right. */
+				int i;
+				int j;
+
+				j = escLen; /* avoid the null? */
+				while(j > -1 &&
+					(esc[j] & 255)
+						== 
+					(UTF8Escapes[cnt].tag[j] & 255)) {
+					j--;
+				}
+				if (j == -1) { /* match! */
+/*
+					fprintf(stderr, "... match: %c\n",
+						UTF8Escapes[cnt].value);
+*/
+					val = UTF8Escapes[cnt].value;
+					*endp = (char *)(esc +
+						strlen(UTF8Escapes[cnt].tag));
+					return(val); /* RIGHT NOW! */
+				}
+			}
+			cnt++;
+		}
+		if (UTF8Escapes[cnt].tag == NULL) {
+#ifndef DISABLE_TRACE
+			if (htmlwTrace) {
+				fprintf(stderr, "No UTF-8 translation\n");
+				fprintf(stderr,
+			"UTF-8 translate: (%d): \"\\x%x\\x%x\\x%x\" %x %x\n",
+					escLen,
+				esc[0] & 255, esc[1] & 255, esc[2] & 255,
+					esc[3] & 255, esc[4] & 255);
+			}
+#endif
+			val = esc;
+			*endp = (char *)(esc + strlen(esc));
+		}
+	}
+
+/* This now has to occur in a ugly little loop because we want to handle
+   named sequences first; that's how I hacked in the translation table for
+   Unicode. -- ck */
 	esc++;
-	if (*esc == '#')
+	/* Classic renderer handles # first [and it is fallback for 
+		second_time_thru]. */
+	ampploop: if (*esc == '#' && (classic_renderer || second_time_thru))
 	{
 		if (unterminated)
 		{
@@ -326,7 +397,7 @@ ExpandEscapes(esc, endp, termination)
 		int escLen, ampLen;
 		cnt = 0;
 		escLen = strlen(esc);	
-		while (AmpEscapes[cnt].tag != NULL)
+		while (AmpEscapes[cnt].tag != NULL && !second_time_thru)
 		{
 			ampLen = strlen(AmpEscapes[cnt].tag);
 			if ((escLen == ampLen) && (strncmp(esc, AmpEscapes[cnt].tag, ampLen) == 0))
@@ -338,8 +409,14 @@ ExpandEscapes(esc, endp, termination)
 			}
 			cnt++;
 		}
-		if (AmpEscapes[cnt].tag == NULL)
+		if (AmpEscapes[cnt].tag == NULL || second_time_thru)
+			/* We should not have a non-null AmpEscape btw. */
 		{
+			if (!classic_renderer && !second_time_thru) {
+				/* Now we fall back on #'s. */
+				second_time_thru = 1;
+				goto ampploop;
+			}
 #ifndef DISABLE_TRACE
 			if (htmlwTrace) {
 				fprintf(stderr, "Error bad & string\n");
@@ -364,6 +441,11 @@ ExpandEscapes(esc, endp, termination)
  * a valid escape sequence.  Other &'s are left alone.
  * The cleaning is done by rearranging chars in the passed txt buffer.
  * if any escapes are replaced, the string becomes shorter.
+ * Cameron adds:
+ * Also, if we are not using the classic renderer, then try to do some
+ * minimal translation of UTF-8 sequences (see also the & expansion routine).
+ * We treat them as "space delimited" to make the system clean up after
+ * ourselves for free.
  */
 void
 clean_text(txt)
@@ -371,6 +453,7 @@ clean_text(txt)
 {
 	int unterminated;
 	int space_terminated;
+	int utf8;
 	char *ptr;
 	char *ptr2;
 	char *start;
@@ -379,6 +462,8 @@ clean_text(txt)
 	char tchar;
 	char val;
 
+	utf8 = 0;
+
 	if (txt == NULL)
 	{
 		return;
@@ -386,6 +471,7 @@ clean_text(txt)
 
 	/*
 	 * Quick scan to find escape sequences.
+	 * (and characters with the high-bit set ... Cameron)
 	 * Escape is '&' followed by a letter (or a hash mark).
 	 * return if there are none.
 	 */
@@ -396,6 +482,10 @@ clean_text(txt)
 			((isalpha((int)*(ptr + 1)))||(*(ptr + 1) == '#')))
 		{
 			break;
+		}
+		if ((*ptr & 192)==192 && !classic_renderer) {
+			utf8 = 1;
+			break; /* could be a UTF-8 sequence. could be crap. */
 		}
 		ptr++;
 	}
@@ -412,14 +502,17 @@ clean_text(txt)
 	while (*ptr != '\0')
 	{
 
+		int utf8_mask = 192; /* only the first time */
 		unterminated = 0;
 		space_terminated = 0;
 		/*
 		 * Extract the escape sequence from start to ptr
 		 */
 		start = ptr;
-		while ((*ptr != ';')&&(!isspace((int)*ptr))&&(*ptr != '\0'))
+		while ((utf8 && (*ptr & 192)==utf8_mask) || (!utf8 &&
+			(*ptr != ';')&&(!isspace((int)*ptr))&&(*ptr != '\0')))
 		{
+			utf8_mask = 128; /* subsequent characters */
 			ptr++;
 		}
 		if (*ptr == '\0')
@@ -432,15 +525,18 @@ clean_text(txt)
 #endif
 			unterminated = 1;
 		}
-		else if (isspace((int)*ptr))
+		else if (isspace((int)*ptr) || utf8)
 		{
-			space_terminated = 1;
+			space_terminated = 1; /* really, I'm overloading
+				this to mean that the "trailing" character
+				should not be consumed. */
 		}
 
 		/*
 		 * Copy the escape sequence into a separate buffer.
 		 * Then clean spaces so the "& lt ;" = "&lt;" etc.
 		 * The cleaning should be unnecessary.
+		 * Don't do this for UTF-8 sequences, obviously.
 		 */
 		tchar = *ptr;
 		*ptr = '\0';
@@ -457,10 +553,12 @@ clean_text(txt)
 		}
 		strcpy(text, start);
 		*ptr = tchar;
-		clean_white_space(text);
+		if (!utf8)
+			clean_white_space(text);
 
 		/*
 		 * Replace escape sequence with appropriate character
+		 * This routine is also UTF-8 aware.
 		 */
 		val = ExpandEscapes(text, &tend,
 			((space_terminated << 1) + unterminated));
@@ -502,12 +600,17 @@ clean_text(txt)
 		 */
 		ptr2++;
 		ptr++;
+		utf8 = 0;
 		while (*ptr != '\0')
 		{
 			if ((*ptr == '&')&&
 			    ((isalpha((int)*(ptr + 1)))||(*(ptr + 1) == '#')))
 			{
 				break;
+			}
+			if ((*ptr & 192)==192 && !classic_renderer) {
+				utf8 = 1;
+				break; /* another UTF-8 sequence? */
 			}
 			*ptr2++ = *ptr++;
 		}
@@ -558,6 +661,11 @@ get_text(start, endp)
 				}
 			}
 			else if (*(ptr + 1) == '!')  /* a comment */
+			{
+				break;
+			}
+			else if (*(ptr + 1) == '?' && !classic_renderer)
+				/* XML? */
 			{
 				break;
 			}
@@ -627,6 +735,11 @@ get_mark(start, endp)
 	if (strncmp (start, "<!--", 4)==0)
 	  comment=1;
 
+	/* If this is an XML type tag, treat it essentially as a degenerate
+		comment.  - CK */
+	if (strncmp (start, "<?", 2) == 0 && !classic_renderer)
+		comment = 1;
+
 	start++;
 	first_gt = NULL;
 
@@ -648,6 +761,7 @@ get_mark(start, endp)
 
 	/* amb - skip over the comment text */
 	/* end tag is --*>, where * is zero or more spaces (ugh) */
+	/* also works for <? .. ?> */
 	if (comment)
 	  {
 	    while (*ptr != '\0')
@@ -1398,7 +1512,8 @@ ParseMarkType(str)
 			type = M_TABLE_DATA;
 		}
 		else {
-			type = M_UNKNOWN;
+			type = (classic_renderer) ? M_UNKNOWN :
+				M_PARAGRAPH;
 		}
 	}
 	else if (caseless_equal(str, MT_MAP))
@@ -1410,6 +1525,9 @@ ParseMarkType(str)
 		type = M_SCRIPT;
 	} else if (caseless_equal(str, MT_STYLESHEET)) {
 		type = M_STYLESHEET;
+	} else if (caseless_equal(str, MT_DIV)) {
+		type = (classic_renderer) ? M_UNKNOWN :
+			M_PARAGRAPH;
 	}
 
 /* ADD NEW HTML TAGS HERE ck */

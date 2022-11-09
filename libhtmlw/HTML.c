@@ -1,3 +1,5 @@
+/* Changes for Mosaic-CK (C)2009,2010 Cameron Kaiser */
+
 /****************************************************************************
  * NCSA Mosaic for the X Window System                                      *
  * Software Development Group                                               *
@@ -164,7 +166,8 @@ static XtGeometryResult GeometryManager(Widget w, XtWidgetGeometry *request,
 static void		RecolorInternalHRefs(HTMLWidget hw, char *href);
 static Dimension        VbarWidth(HTMLWidget hw);
 static Dimension        HbarHeight(HTMLWidget hw);
-static void		ViewRedisplay(HTMLWidget hw, int x, int y,
+/* static */
+void		ViewRedisplay(HTMLWidget hw, int x, int y,
 				int width, int height);
 void             ViewClearAndRefresh(HTMLWidget hw);
 static void             CallLinkCallbacks(HTMLWidget hw);
@@ -179,6 +182,10 @@ int htmlwTrace;
 
 /* for selective image loading */
 extern Boolean currently_delaying_images;
+
+/* for progressive rendering */
+extern Boolean progressive_rendering;
+int prog_widget_disable;
 
 /*
  * Default translations
@@ -1997,7 +2004,8 @@ ConfigScrollBars(
  * May be called because of a changed document, or because of a changed
  * window size.
  */
-static void
+static /* DO NOT CALL THIS OUTSIDE! */
+void
 #ifdef _NO_PROTO
 ReformatWindow (hw)
             HTMLWidget hw ;
@@ -2347,7 +2355,10 @@ DebugHook(x, y, width, height)
  * in the viewing area, and it redisplays that portion of the
  * underlying document area.
  */
-static void
+/*
+static
+*/
+void
 #ifdef _NO_PROTO
 ViewRedisplay (hw, x, y, width, height)
             HTMLWidget hw;
@@ -6146,6 +6157,14 @@ HTMLSetText(Widget w, char *text, char *header_text, char *footer_text, int elem
 	 * Hide any old widgets
 	 */
 	HideWidgets(hw);
+	/* progressive_rendering won't work if we've got stale widgets.
+		- Cameron */
+	prog_widget_disable = (hw->html.widget_list != NULL ||
+		hw->html.form_list != NULL) ? 1 : 0;
+/*
+	fprintf(stderr, "prog_widget_disable = %i\n",
+		prog_widget_disable);
+*/
 	hw->html.widget_list = wptr;
 	hw->html.form_list = NULL;
 

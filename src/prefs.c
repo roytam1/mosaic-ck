@@ -524,6 +524,11 @@ static Boolean write_preferences_file(prefsStructP inPrefsStruct) {
 		   "NUMBER_OF_ITEMS_IN_RBM_HISTORY");
 
     write_pref_boolean (fp, eUSESHORTNEWSRC, "USESHORTNEWSRC");
+
+/* Updates for Mosaic-CK */
+    write_pref_boolean (fp, ePROGRESSIVE_RENDERING, "PROGRESSIVE_RENDERING");
+    write_pref_boolean (fp, eBETTER_RENDERER, "BETTER_RENDERER");
+
     fclose(fp);
     return successful;
     
@@ -1032,6 +1037,15 @@ void *get_pref(long pref_id) {
         case eUSESHORTNEWSRC:
 	  return (void *)&(thePrefsStructP->RdataP->newsUseShortNewsrc);
           break;
+
+/* changes for Mosaic-CK */
+	case ePROGRESSIVE_RENDERING:
+	  return (void *)&(thePrefsStructP->RdataP->progressiveRendering);
+	  break;
+	case eBETTER_RENDERER:
+	  return (void *)&(thePrefsStructP->RdataP->classicRenderer);
+	  break;
+
     }
 
 }
@@ -1704,6 +1718,17 @@ void set_pref(long pref_id, void *incoming) {
         case eUSESHORTNEWSRC:
 	  thePrefsStructP->RdataP->newsUseShortNewsrc = *((int *)incoming);
           break;
+
+/* changes for Mosaic-CK */
+
+        case ePROGRESSIVE_RENDERING:
+            thePrefsStructP->RdataP->progressiveRendering =
+                *((Boolean *)incoming);
+            break;
+        case eBETTER_RENDERER:
+            thePrefsStructP->RdataP->classicRenderer =
+                *((Boolean *)incoming);
+            break;
     }
 
 }

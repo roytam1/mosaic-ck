@@ -40,7 +40,7 @@ knrflag =
 #### For Convex whatever, do -DCONVEX
 #### For SCO ODT 3.0, do -DSCO -DSVR4 -DMOTIF1_2
 #### For Motorola SVR4, do -DSVR4 -DMOTOROLA -DMOTIF1_2
-sysconfigflags = -DMOTIF1_2 -DLINUX
+sysconfigflags = -DMOTIF1_2 -DLINUX -DHAVE_ERRLIST -DUSE_STDARG
 
 #### System libraries.
 # syslibs = -lPW -lsun -lmalloc
@@ -135,7 +135,7 @@ static_xlibs = /usr/X11R6/lib/libXpm.a /usr/X11R6/lib/libXm.a /usr/X11R6/lib/lib
 #### For inline PNG support, the following should be defined:
 #### The libraries currently used are PNGLIB 0.81 and ZLIB 0.95
 
-pngdir = /xdev/mosaic/libpng/linux
+pngdir = /usr
 pnglibdir = $(pngdir)/lib
 pngincludedir = $(pngdir)/include
 pnglibs = $(pnglibdir)/libpng.a $(pnglibdir)/libz.a /usr/lib/libm.a
@@ -145,7 +145,7 @@ pngflags =  -I$(pngincludedir) -DHAVE_PNG
 #### For inline JPEG support, the following should be defined:
 #### The library used is Independent JPEG Group (IJG's) 5.0a.
 
-jpegdir = /xdev/mosaic/libjpeg/linux
+jpegdir = /usr
 jpeglibs = $(jpegdir)/lib/libjpeg.a
 jpegflags = -I$(jpegdir)/include -DHAVE_JPEG
 

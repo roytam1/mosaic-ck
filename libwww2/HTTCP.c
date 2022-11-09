@@ -1,3 +1,5 @@
+/* Changes for Mosaic-CK (C)2009, 2010 Cameron Kaiser */
+
 /*			Generic Communication Code		HTTCP.c
 **			==========================
 **
@@ -211,7 +213,8 @@ PUBLIC int HTParseInet ARGS2(SockA *,sin, WWW_CONST char *,str)
     } 
   else 
     {		    /* Alphanumeric node name: */
-      if (cached_host && (strcmp (cached_host, host) == 0))
+/* strcasecmp() much more efficient! -- CK */
+      if (cached_host && (strcasecmp (cached_host, host) == 0))
         {
 #if 0
           fprintf (stderr, "=-= Matched '%s' and '%s', using cached_phost.\n",
@@ -465,7 +468,7 @@ PUBLIC int HTDoConnect (char *url, char *protocol, int default_port, int *s)
 	  /* linux (and some other os's, I think) clear timeout... 
 	     let's reset it every time. bjs */
 	  timeout.tv_sec = 0;
-	  timeout.tv_usec = 100000;
+	  timeout.tv_usec = 999999; /* some impls don't like 100000 */
 
 #ifdef __hpux
           ret = select(FD_SETSIZE, NULL, (int *)&writefds, NULL, &timeout);
@@ -489,6 +492,8 @@ PUBLIC int HTDoConnect (char *url, char *protocol, int default_port, int *s)
             }
           else if (ret > 0)
             {
+		/* Removing this code doesn't help with speed*/
+
 	      /*
 	       * Extra check here for connection success, if we try to connect
 	       * again, and get EISCONN, it means we have a successful
@@ -583,7 +588,8 @@ int HTDoRead (int fildes, void *buf, unsigned nbyte)
 	  /* linux (and some other os's, I think) clear timeout... 
 	     let's reset it every time. bjs */
 	timeout.tv_sec = 0;
-	timeout.tv_usec = 100000;
+	/* this works a lot better if it's 999999 instead of 1.0 -- CK */
+	timeout.tv_usec = 999999;
 
 #ifdef __hpux
         ret = select(FD_SETSIZE, (int *)&readfds, NULL, NULL, &timeout);

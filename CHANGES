@@ -1,5 +1,31 @@
 See document FEATURES for canonical list of features.
 
+2.7ck8
+------
+ o Initial progressive rendering support (default: "Progressive Rendering")
+ o Alternative renderer support (default: old rendering style available
+		with "Use Classic Renderer"). This will be where rendering
+		improvements go in order to preserve the app as a historical
+		recreation as well.
+	o initial UTF-8 and Unicode translation support
+	o <div></div>, <td></td> now seen as block elements
+	o <script> and <style> now only ignored under alternative renderer
+	o <?xml ...> now properly ignored
+ o More HTML entities (in both classic and alternative renderer for efficiency)
+ o Linux support restored, thanks to Jeroen Schot (.linux)
+ o Old Linux support moved to .linux1
+ o Optimization enabled for .osx, .uosx, .ppcmt
+ o Source code cleanup
+
+2.7ck7
+------
+ o Mac OS X support (.osx, .uosx)
+ o <script>, <style> aware
+ o Multiple improvements to Gopher core, including hURLs and itypes i & 3
+ o Multiple security fixes to Gopher core
+ o http_proxy correctly understood with slash at end or not
+ o View Images Internally now default
+
 2.7ck6
 ------
  o New version number

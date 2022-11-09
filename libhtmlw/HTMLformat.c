@@ -1,4 +1,4 @@
-/* Changes for Mosaic-CK (C)2009 Cameron Kaiser */
+/* Changes for Mosaic-CK (C)2009, 2010 Cameron Kaiser */
 
 /****************************************************************************
  * NCSA Mosaic for the X Window System                                      *
@@ -121,6 +121,13 @@ extern void TableRefresh();
 
 /* for selective image loading */
 extern Boolean currently_delaying_images;
+
+/* for progressive rendering */
+extern Boolean progressive_rendering;
+extern int prog_widget_disable;
+
+/* for classic renderer */
+extern Boolean classic_renderer;
 
 /*******************************/
 
@@ -3064,6 +3071,25 @@ ImagePlace(hw, mptr, x, y, width)
 	}
 	PF_LF_State = 0;
 	NeedSpace = 1;
+	if (progressive_rendering) {
+/*
+		fprintf(stderr, "image was loaded\n");
+*/
+		if (prog_widget_disable) {
+			/* don't try to update if widgets were present
+				on the PRECEDING page (they don't get
+				cleaned up properly). */
+/*
+			fprintf(stderr, "but we have widgets");
+*/
+		} else {
+                	ScrollWidgets(hw);
+                	ViewClearAndRefresh(hw); 
+                	ViewRedisplay(hw, 0, 0,
+                		hw->html.view_width,
+				hw->html.view_height);
+		}
+	}
 }
 
 
@@ -3465,7 +3491,7 @@ TriggerMarkChanges(hw, mptr, x, y)
 	      }
 	
 	/* handle <script> and other block-ignore tags at this level  -- ck */
-	if (type == M_SCRIPT) {
+	if (type == M_SCRIPT && !classic_renderer) {
 		if (mark->is_end) {
 			InScript = 0;
 			/* just ignore them right now. we can't really
@@ -3477,7 +3503,7 @@ TriggerMarkChanges(hw, mptr, x, y)
 		}
 	}
 
-	if (type == M_STYLESHEET) {
+	if (type == M_STYLESHEET && !classic_renderer) {
 		if (mark->is_end) {
 			InStyleSheet = 0;
 			/* ignore for now, might have a primitive parser
@@ -4881,6 +4907,15 @@ FormatChunk(hw, x, y)
 			mptr = mptr->next;
 			}
 	}
+/*
+	if (progressive_rendering) {
+		fprintf(stderr, "chunk rendered\n");
+                ScrollWidgets(hw);
+                ViewClearAndRefresh(hw);
+                ViewRedisplay(hw, 0, 0,
+                        hw->html.view_width, hw->html.view_height);
+	}
+*/
 }
 
 

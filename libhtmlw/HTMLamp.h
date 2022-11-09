@@ -1,4 +1,5 @@
-/* Eventually this is going to need to be Unicode. -- ck */
+/* Changes for Mosaic-CK (C) 2009, 2010 Cameron Kaiser 
+   Eventually this is going to need to be fully Unicode. -- ck */
 
 /****************************************************************************
  * NCSA Mosaic for the X Window System                                      *
@@ -169,6 +170,26 @@ static AmpEsc AmpEscapes[] = {
 	{"yacute", '\375'},
 	{"thorn", '\376'},
 	{"yuml", '\377'},
+
+/* ck */
+
+	{"mdash", '-'},
+	{"ndash", '-'},
+	{"bull", '*'},
+
+/* This is where the hacked-in Unicode support lives for &#xxxx where xxxx is
+	a 16-bit quantity. Until we can handle Unicode "natively" this is the
+	best we can do in this case. See also HTMLutf8.h. -- Cameron */
+
+	{"#8211", '-'},
+	{"#8212", '-'},
+	{"#8216", '\''},
+	{"#8217", '\''},
+	{"#8220", '"'},
+	{"#8221", '"'},
+	{"#160", ' '},
+	{"#9733", '*'},
+	
 
 	{NULL, '\0'},
 };

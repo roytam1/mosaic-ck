@@ -5,7 +5,7 @@ all: $(LIBTARGET)
 CFILES = HTML.c HTMLlists.c HTMLformat.c HTMLparse.c HTMLimages.c HTMLwidgets.c HTML-PSformat.c DrawingArea.c HTMLjot.c HTMLtable.c list.c 
 
 OBJS = $(CFILES:.c=.o)
-$(OBJS): HTML.h HTMLP.h
+$(OBJS): HTML.h HTMLP.h HTMLamp.h HTMLutf8.h
 
 
 $(LIBTARGET): $(OBJS)

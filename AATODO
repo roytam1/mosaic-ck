@@ -1,0 +1,21 @@
+Alternative renderer
+--------------------
+Need to accept ' and spaces as delimiters for SRC, HREF
+example:
+http://littleaugury.blogspot.com/search/label/Barry Lyndon
+This sucks, but we should allow it.
+
+Expand UTF-8 table
+
+<p align =""> and <center></center>
+
+Interface
+---------
+Scroll to an anchor/fragment
+Allow scrolling while loading images
+
+System
+------
+Fix and reenable SOCKS
+SSL
+

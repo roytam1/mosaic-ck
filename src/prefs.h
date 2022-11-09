@@ -1,4 +1,4 @@
-/* Changes for Mosaic-CK (C)2009 Cameron Kaiser */
+/* Changes for Mosaic-CK (C)2009-10 Cameron Kaiser */
 
 /****************************************************************************
  * NCSA Mosaic for the X Window System                                      *
@@ -303,6 +303,10 @@ typedef struct
 
     Boolean newsUseShortNewsrc;
 
+  /* newest in 2.7ck8 TOP THAT Y'ALL ... nvm */
+    Boolean progressiveRendering;
+    Boolean classicRenderer;
+
 } AppData, *AppDataPtr;
 
 
@@ -360,7 +364,7 @@ void mo_preferences_dialog(mo_window *win);
      write_preferences_file() so that your preference will be added to the
      new prefs file.
 
-  6) Add a news case to get_pref().
+  6) Add a new case to get_pref().
 
   7) Add a new case to set_pref().
 

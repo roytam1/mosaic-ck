@@ -1,3 +1,6 @@
+/* Changes for Mosaic-CK (C) 2009, 2010 Cameron Kaiser 
+   Eventually this is going to need to be fully Unicode. -- ck */
+
 /****************************************************************************
  * NCSA Mosaic for the X Window System                                      *
  * Software Development Group                                               *
@@ -52,183 +55,40 @@
  * mosaic-x@ncsa.uiuc.edu.                                                  *
  ****************************************************************************/
 
-/* 
- * Created: Fri Dec 22 21:14:56 CDT 1995
- * Author: Dan Pape
- *
- */
+/* Place the UTF-8 sequence below, along with the character to map it to.
+   This is very simple-minded, but it works surprisingly well for many sites.
+   A nice way to get more characters to encode is from
 
-/* This should only be compiled once per source file */
+	http://netzreport.googlepages.com/online_tool_for_url_en_decoding.html
 
+*/
 
-enum pref_item {
+typedef struct utf8_esc_rec {
+	char *tag;
+	char value;
+} UTF8Esc;
 
-    eTRACK_VISITED_ANCHORS, 
-    eDISPLAY_URLS_NOT_TITLES, 
-    eTRACK_POINTER_MOTION, 
-    eTRACK_FULL_URL_NAMES, 
-    eANNOTATIONS_ON_TOP, 
-    eCONFIRM_DELETE_ANNOTATION, 
-    eANNOTATION_SERVER, 
-    eRECORD_COMMAND_LOCATION, 
-    eRECORD_COMMAND, 
-    eRELOAD_PRAGMA_NO_CACHE, 
-    eSENDMAIL_COMMAND, 
-    eEDIT_COMMAND, 
-    eXTERM_COMMAND, 
-    eMAIL_FILTER_COMMAND, 
-    ePRIVATE_ANNOTATION_DIRECTORY, 
-    eHOME_DOCUMENT, 
-    eTMP_DIRECTORY, 
-    eDOCS_DIRECTORY, 
-    eDEFAULT_FONT_CHOICE, 
-    eGLOBAL_HISTORY_FILE, 
-    eUSE_GLOBAL_HISTORY,
-    eHISTORY_FILE,
-    eDEFAULT_HOTLIST_FILE, 
-    eDEFAULT_HOT_FILE, 
-    eADD_HOTLIST_ADDS_RBM,
-    eADD_RBM_ADDS_RBM,
-    eDOCUMENTS_MENU_SPECFILE, 
-    eCOLORS_PER_INLINED_IMAGE, 
-    eIMAGE_CACHE_SIZE, 
-    eRELOAD_RELOADS_IMAGES, 
-    eREVERSE_INLINED_BITMAP_COLORS, 
-    eDELAY_IMAGE_LOADS, 
-    eSCREEN_GAMMA,
-    eDEFAULT_AUTHOR_NAME, 
-    eDEFAULT_AUTHOR_EMAIL, 
-    eSIGNATURE, 
-    eMAIL_MODE, 
-    ePRINT_COMMAND, 
-    eUNCOMPRESS_COMMAND, 
-    eGUNZIP_COMMAND, 
-    eUSE_DEFAULT_EXTENSION_MAP, 
-    eUSE_DEFAULT_TYPE_MAP, 
-    eGLOBAL_EXTENSION_MAP, 
-    ePERSONAL_EXTENSION_MAP, 
-    eGLOBAL_TYPE_MAP, 
-    ePERSONAL_TYPE_MAP, 
-    eTWEAK_GOPHER_TYPES,
-    eGUI_LAYOUT,
-    ePRINT_MODE, 
-    ePRINT_BANNERS, 
-    ePRINT_FOOTNOTES, 
-    ePRINT_PAPER_SIZE_US, 
-    ePROXY_SPECFILE, 
-    eNOPROXY_SPECFILE, 
-    eCCIPORT, 
-    eMAX_NUM_OF_CCI_CONNECTIONS, 
-    eMAX_WAIS_RESPONSES, 
-    eKIOSK, 
-    eKIOSKPRINT,
-    eKIOSKNOEXIT, 
-    eKEEPALIVE, 
-    eFTP_TIMEOUT_VAL, 
-    eENABLE_TABLES, 
-    eDEFAULT_WIDTH, 
-    eDEFAULT_HEIGHT, 
-    eAUTO_PLACE_WINDOWS, 
-    eINITIAL_WINDOW_ICONIC, 
-    eTITLEISWINDOWTITLE, 
-    eUSEICONBAR, 
-    eUSETEXTBUTTONBAR, 
-    eTWIRLING_TRANSFER_ICON, 
-    eSECURITYICON, 
-    eTWIRL_INCREMENT, 
-    eSAVE_MODE, 
-    eHDF_MAX_IMAGE_DIMENSION, 
-    eHDF_MAX_DISPLAYED_DATASETS, 
-    eHDF_MAX_DISPLAYED_ATTRIBUTES, 
-    eHDF_POWER_USER, 
-    eHDFLONGNAME, 
-    eFULL_HOSTNAME, 
-    eLOAD_LOCAL_FILE, 
-    eEDIT_COMMAND_USE_XTERM, 
-    eCONFIRM_EXIT, 
-    eDEFAULT_FANCY_SELECTIONS, 
-    eCATCH_PRIOR_AND_NEXT, 
-    eSIMPLE_INTERFACE, 
-    ePROTECT_ME_FROM_MYSELF, 
-    eGETHOSTBYNAME_IS_EVIL, 
-#ifdef __sgi
-    eDEBUGGING_MALLOC,
-#endif
-    eUSEAFSKLOG,
-    
-	eSEND_REFERER,
-	eSEND_AGENT,
-	eEXPAND_URLS,
-	eEXPAND_URLS_WITH_NAME,
-	eDEFAULT_PROTOCOL,
-	eMETER_FOREGROUND,
-	eMETER_BACKGROUND,
-	eMETER_FONT_FOREGROUND,
-	eMETER_FONT_BACKGROUND,
-	eMETER,
-	eBACKUP_FILES,
-	ePIX_BASENAME,
-	ePIX_COUNT,
-	eACCEPT_LANGUAGE_STR,
+/* For performance, put common sequences first. */
+static UTF8Esc UTF8Escapes[] = {
+	/* quotes */
+	{"\xe2\x80\x98", '\''},
+	{"\xe2\x80\x99", '\''},
+	{"\xe2\x80\x9c", '"'}, 
+	{"\xe2\x80\x9d", '"'}, 
 
-	eFTP_REDIAL,
-	eFTP_REDIAL_SLEEP,
-	eFTP_FILENAME_LENGTH,
-	eFTP_ELLIPSIS_LENGTH,
-	eFTP_ELLIPSIS_MODE,
-	eTITLE_ISWINDOW_TITLE,
-	eUSE_ICONBAR,
-	eUSE_TEXTBUTTONBAR,
-	eUSE_SCREEN_GAMMA,
-    eDISABLEMIDDLEBUTTON,
+	/* dashes */
+	{"\xe2\x80\x93", '-'},
 
-    eHTTPTRACE,
-    eWWW2TRACE,
-    eHTMLWTRACE,
-    eCCITRACE,
-    eSRCTRACE,
-    eCACHETRACE,
-    eNUTTRACE,
-    eANIMATEBUSYICON,
-    
-    eSPLASHSCREEN,
-    eINSTALL_COLORMAP,
-    eIMAGEVIEWINTERNAL,
-    eURLEXPIRED,
-    ePOPUPCASCADEMAPPINGDELAY,
-    eFRAME_HACK,
+	/* bullets */
+	{"\xc2\xb7", '*'},
+	{"\xe2\x80\xa2", '*'},
 
-    eUSETHREADVIEW,
-    eSHOWREADGROUPS,
-    eNOTHREADJUMPING,
-    eSHOWALLGROUPS,
-    eSHOWALLARTICLES,
-    eUSEBACKGROUNDFLUSH,
-    eBACKGROUNDFLUSHTIME,
+	/* Latin diacritics */
+	{"\xc3\xa9", '\351'}, /* eacute */
 
-    eCLIPPING,
-    eMAX_CLIPPING_SIZE_X,
-    eMAX_CLIPPING_SIZE_Y,
+	/* miscellaneous */
+	{"\xe2\x86\xa9", '<'}, /* curly arrow */
 
-    eUSE_LONG_TEXT_NAMES,
-    eTOOLBAR_LAYOUT,
-
-    ePREVISUNREAD,
-    eNEXTISUNREAD,
-    eUSENEWSRC,
-    eNEWSRCPREFIX,
-    eNEWSAUTHORWIDTH,
-    eNEWSSUBJECTWIDTH,
-
-    eFOCUS_FOLLOWS_MOUSE,
-
-/* Mosaic-CK stuff */
-
-    eBETTER_RENDERER,
-    ePROGRESSIVE_RENDERING,
-
-    eSESSION_HISTORY_ON_RBM,
-    eNUMBER_OF_ITEMS_IN_RBM_HISTORY,
-    eHOTLIST_ON_RBM,
-    eUSESHORTNEWSRC
+	{NULL, '\0'},
 };
+

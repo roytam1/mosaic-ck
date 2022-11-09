@@ -8,6 +8,8 @@
 ## and a cast of probably two or three people
 ##
 
+CKVERS=27ck8
+
 all: dev_$(DEV_ARCH)
 
 list: dev_
@@ -17,7 +19,8 @@ dev_::
 	@echo "[DEV_ARCH] to one of the following:"
 	@echo "-- CURRENTLY SUPPORTED --"
 	@echo "  ppcmt -- PowerPC running Power MachTen 4.1.4 or higher"
-	@echo "  osx -- Mac OS X 10.4+ (earlier possible but unsupported)"
+	@echo "  osx -- Mac OS X 10.4+ PPC OR x86 (earlier possible but unsupported)"
+	@echo "  linux -- Current Linux 2.x, dynamically linked"
 	@echo "-- USE SOMETHING ELSE UNLESS YOU KNOW WHAT YOU'RE DOING --"
 	@echo "  uosx -- Universal Binary Mac OS X 10.4+"
 	@echo "-- ARCHIVAL (AT YOUR OWN RISK) --"
@@ -27,9 +30,9 @@ dev_::
 	@echo "  hp -- HP 9000/735 running HP-UX A.09.01"
 	@echo "  ibm -- IBM RS6000 running AIX 4.4 BSD"
 	@echo "  indy -- SGI Indy running IRIX 5.3"
-	@echo "  linux -- x86 running Linux 1.2.13 DYNAMIC"
-	@echo "  linux-static -- x86 running Linux 1.2.13 ALL STATIC"
-	@echo "  linux-static-motif -- x86 running Linux 1.2.13 STATIC MOTIF"
+	@echo "  linux1 -- x86 running Linux 1.2.13 DYNAMIC"
+	@echo "  linux1-static -- x86 running Linux 1.2.13 ALL STATIC"
+	@echo "  linux1-static-motif -- x86 running Linux 1.2.13 STATIC MOTIF"
 	@echo "  sco -- x86 running SCO System V 3.2"
 	@echo "  sgi -- SGI Iris running IRIS 4.0.2"
 	@echo "  solaris-23 -- SPARCstation 20 running Solaris 2.3"
@@ -139,21 +142,29 @@ p_linux: rm_and_touch
 q_linux: rm_and_touch
 	$(MAKE) -f makefiles/Makefile.linux quantifyd DEV_ARCH=linux
 
-dev_linux_static: rm_and_touch linux_static
-linux_static: rm_and_touch
-	$(MAKE) -f makefiles/Makefile.linux staticd DEV_ARCH=linux
-p_linux_static: rm_and_touch
-	$(MAKE) -f makefiles/Makefile.linux p_staticd DEV_ARCH=linux
-q_linux_static: rm_and_touch
-	$(MAKE) -f makefiles/Makefile.linux q_staticd DEV_ARCH=linux
+dev_linux1: rm_and_touch linux1
+linux1: rm_and_touch
+	$(MAKE) -f makefiles/Makefile.linux1 DEV_ARCH=linux
+p_linux1: rm_and_touch
+	$(MAKE) -f makefiles/Makefile.linux1 purifyd DEV_ARCH=linux
+q_linux1: rm_and_touch
+	$(MAKE) -f makefiles/Makefile.linux1 quantifyd DEV_ARCH=linux
 
-dev_linux_static_motif: rm_and_touch linux_static_motif
-linux_static_motif: rm_and_touch
-	$(MAKE) -f makefiles/Makefile.linux static_motifd DEV_ARCH=linux
-p_linux_static_motif: rm_and_touch
-	$(MAKE) -f makefiles/Makefile.linux p_static_motifd DEV_ARCH=linux
-q_linux_static_motif: rm_and_touch
-	$(MAKE) -f makefiles/Makefile.linux q_static_motifd DEV_ARCH=linux
+dev_linux1_static: rm_and_touch linux1_static
+linux1_static: rm_and_touch
+	$(MAKE) -f makefiles/Makefile.linux1 staticd DEV_ARCH=linux
+p_linux1_static: rm_and_touch
+	$(MAKE) -f makefiles/Makefile.linux1 p_staticd DEV_ARCH=linux
+q_linux1_static: rm_and_touch
+	$(MAKE) -f makefiles/Makefile.linux1 q_staticd DEV_ARCH=linux
+
+dev_linux1_static_motif: rm_and_touch linux1_static_motif
+linux1_static_motif: rm_and_touch
+	$(MAKE) -f makefiles/Makefile.linux1 static_motifd DEV_ARCH=linux
+p_linux1_static_motif: rm_and_touch
+	$(MAKE) -f makefiles/Makefile.linux1 p_static_motifd DEV_ARCH=linux
+q_linux1_static_motif: rm_and_touch
+	$(MAKE) -f makefiles/Makefile.linux1 q_static_motifd DEV_ARCH=linux
 
 dev_sco: rm_and_touch sco
 sco: rm_and_touch
@@ -224,5 +235,5 @@ clean:
 dist: clean targz
 
 targz:
-	cd .. ; rm -f mosaic27ck7.tar* ; tar cvf mosaic27ck7.tar mosaic27ck7 ; gzip mosaic27ck7.tar
+	cd .. ; rm -f mosaic$(CKVERS).tar* ; tar cvf mosaic$(CKVERS).tar mosaic$(CKVERS) ; gzip mosaic$(CKVERS).tar
 

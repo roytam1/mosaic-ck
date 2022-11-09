@@ -374,9 +374,14 @@ static XtResource resources[] = {
   { "splashScreen", "SplashScreen", XtRBoolean, sizeof (Boolean),
       offset (splashScreen), XtRString, "True" },
 
-/* ck */
+/* Customizations for Mosaic-CK */
   { "imageViewInternal", "ImageViewInternal", XtRBoolean, sizeof (Boolean),
       offset (imageViewInternal), XtRString, "True" },
+  { "progressiveRendering", "ProgressiveRendering", XtRBoolean,
+	sizeof (Boolean),
+      offset (progressiveRendering), XtRString, "True" },
+  { "classicRenderer", "ClassicRenderer", XtRBoolean, sizeof (Boolean),
+      offset (classicRenderer), XtRString, "False" }, 
 
   { "urlExpired", "UrlExpired", XtRInt, sizeof (int),
       offset (urlExpired), XtRString, "30" },

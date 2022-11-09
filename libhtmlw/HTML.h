@@ -1,4 +1,4 @@
-/* Changes for Mosaic-CK (C)2009 Cameron Kaiser */
+/* Changes for Mosaic-CK (C)2009, 2010 Cameron Kaiser */
 
 /****************************************************************************
  * NCSA Mosaic for the X Window System                                      *
@@ -506,8 +506,10 @@ struct delay_rec {
 #define MT_FRAME	"frame"
 #define MT_MAP		"map" /* swp - client side ismap */
 #define MT_AREA		"area" /* swp - client side ismap */
+/* ck */
 #define MT_SCRIPT	"script"
 #define MT_STYLESHEET	"style"
+#define MT_DIV		"div"
 
 /* anchor tags */
 #define	AT_NAME		"name"
