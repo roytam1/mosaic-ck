@@ -236,10 +236,10 @@ int main(int argc, const char* argv[])
 	
 	err = (OSErr)ExecuteScript(prereqPath, &pid);
 	// 10 is ok, this means that XQuartz was found instead. 11+ == error
-	if (err == (OSErr)11 || err == (OSErr)12) {
+	if ((int)err == 11 || (int)err == 12 || (int)err == 13) {
         CreateEvent(NULL, kEventClassRedFatalAlert, 
-					((err == (OSErr)11) ? kEventKindX11Failed :
-					 (err == (OSErr)12) ? kEventKindMotifNotInstalled : kEventKindNoX11R6), 0,
+					(((int)err == 11) ? kEventKindX11Failed :
+					 ((int)err == 12) ? kEventKindMotifNotInstalled : kEventKindNoX11R6), 0,
                     kEventAttributeNone, &event);
         PostEventToQueue(GetMainEventQueue(), event, kEventPriorityStandard);
 		taskDone = true;
@@ -251,7 +251,7 @@ int main(int argc, const char* argv[])
 		// DON'T COMPILE IT until prereqs pass, because otherwise it tries to
 		// find x11.app and might beachball out.
 		// The script tells us which one it detected.
-		if (err == (OSErr)10)
+		if ((int)err == 10)
 		SimpleCompileAppleScript("tell application \"XQuartz\" to activate");
 		else
 		SimpleCompileAppleScript("tell application \"X11\" to activate");
@@ -730,8 +730,8 @@ static OSStatus MotifFailedHandler(EventHandlerCallRef theHandlerCall,
     if (odtid) pthread_join(odtid, NULL);
 */
 	keepFront = true;
-    RedFatalAlert("\pCan't find OpenMotif",
-                  "\pThis application requires OpenMotif. Please download and install it first.");
+    RedFatalAlert("\pCan't find OpenMotif-Mac",
+                  "\pThis application requires OpenMotif-Mac. Please download and install it first.");
 
     return noErr;
 }
