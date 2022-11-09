@@ -639,7 +639,7 @@ struct stat dest_stat;
  */
 char *my_strerror(int errornum) {
 
-#ifndef VMS   /* PGE, old VMS versions do not support sys_errlist */
+#if !defined(VMS) && !defined(HAVE_STRERROR)   /* PGE, old VMS versions do not support sys_errlist */
         if (errornum<sys_nerr) {
                 return(sys_errlist[errornum]);
 	}

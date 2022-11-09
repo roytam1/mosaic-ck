@@ -93,7 +93,12 @@ PUBLIC int HTInetStatus(where)
     if (www2Trace) {
 	fprintf(stderr, "TCP: Error %d in `errno' after call to %s() failed.\n\t%s\n",
 	    errno,  where,
-	    errno < sys_nerr ? sys_errlist[errno] : "Unknown error" );
+#ifndef HAVE_STRERROR
+	    errno < sys_nerr ? sys_errlist[errno] : "Unknown error"
+#else
+	    strerror(errno)
+#endif
+        );
     }
 #endif
 

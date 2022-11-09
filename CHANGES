@@ -1,5 +1,10 @@
 See document FEATURES for canonical list of features.
 
+2.7ck13
+-------
+System:
+ o Fix for glibc 2.32.
+
 2.7ck12
 -------
 System:
