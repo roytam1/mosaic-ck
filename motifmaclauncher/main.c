@@ -82,6 +82,7 @@
 #define kEventClassRedFatalAlert 911
 #define kEventKindX11Failed 911
 #define kEventKindMotifNotInstalled 912
+#define kEventKindNoX11R6 913
 
 //maximum arguments the script accepts 
 #define	kMaxArgumentsToScript 252
@@ -116,6 +117,8 @@ static OSErr AppOpenAppAEHandler(const AppleEvent *theAppleEvent,
 static OSStatus X11FailedHandler(EventHandlerCallRef theHandlerCall,
                                  EventRef theEvent, void *userData);
 static OSStatus MotifFailedHandler(EventHandlerCallRef theHandlerCall,
+                                 EventRef theEvent, void *userData);
+static OSStatus X11R6FailedHandler(EventHandlerCallRef theHandlerCall,
                                  EventRef theEvent, void *userData);
 
 static OSErr AppReopenAppAEHandler(const AppleEvent *theAppleEvent,
@@ -175,6 +178,9 @@ int main(int argc, const char* argv[])
 	static const EventTypeSpec MotifEvents =
 	{ kEventClassRedFatalAlert, kEventKindMotifNotInstalled }
 	;
+	static const EventTypeSpec X11R6Events =
+	{ kEventClassRedFatalAlert, kEventKindNoX11R6 }
+	;
    static const EventTypeSpec appControlEvents[] =
    {
    { kEventClassApplication, kEventAppActivated },
@@ -208,6 +214,10 @@ int main(int argc, const char* argv[])
                                NewEventHandlerUPP(MotifFailedHandler), 
 							   1, &MotifEvents, 
 							   NULL, NULL);
+    err += InstallEventHandler(GetApplicationEventTarget(),
+                               NewEventHandlerUPP(X11R6FailedHandler), 
+							   1, &X11R6Events, 
+							   NULL, NULL);
 		err += InstallEventHandler(GetApplicationEventTarget(),
 							   NewEventHandlerUPP(AppEventHandlerProc),
 							   GetEventTypeCount(appControlEvents), appControlEvents,
@@ -225,9 +235,11 @@ int main(int argc, const char* argv[])
 	// the user will never see the dialog boxes. Thus, do the prereq script.
 	
 	err = (OSErr)ExecuteScript(prereqPath, &pid);
+	// 10 is ok, this means that XQuartz was found instead. 11+ == error
 	if (err == (OSErr)11 || err == (OSErr)12) {
         CreateEvent(NULL, kEventClassRedFatalAlert, 
-					((err == (OSErr)11) ? kEventKindX11Failed : kEventKindMotifNotInstalled), 0,
+					((err == (OSErr)11) ? kEventKindX11Failed :
+					 (err == (OSErr)12) ? kEventKindMotifNotInstalled : kEventKindNoX11R6), 0,
                     kEventAttributeNone, &event);
         PostEventToQueue(GetMainEventQueue(), event, kEventPriorityStandard);
 		taskDone = true;
@@ -238,6 +250,10 @@ int main(int argc, const char* argv[])
 		// compile "icon clicked" script so it's ready to execute.
 		// DON'T COMPILE IT until prereqs pass, because otherwise it tries to
 		// find x11.app and might beachball out.
+		// The script tells us which one it detected.
+		if (err == (OSErr)10)
+		SimpleCompileAppleScript("tell application \"XQuartz\" to activate");
+		else
 		SimpleCompileAppleScript("tell application \"X11\" to activate");
 		keepFront = false;
 	}
@@ -700,7 +716,7 @@ static OSStatus X11FailedHandler(EventHandlerCallRef theHandlerCall,
 */
 	keepFront = true;
     RedFatalAlert("\pFailed to start X11",
-                  "\pThis application requires Apple X11. Please install it from your OS X disc.");
+                  "\pThis application requires Apple X11 or XQuartz. Please install it from your OS X disc or MacOSForge.");
 
     return noErr;
 }
@@ -719,10 +735,25 @@ static OSStatus MotifFailedHandler(EventHandlerCallRef theHandlerCall,
 
     return noErr;
 }
+// and one for flubbed installs of X11 (such as after an OS upgrade).
+static OSStatus X11R6FailedHandler(EventHandlerCallRef theHandlerCall, 
+                                 EventRef theEvent, void *userData)
+{
+    #pragma unused(theHanderCall, theEvent, userData)
+/*
+    pthread_join(tid, NULL);
+    if (odtid) pthread_join(odtid, NULL);
+*/
+	keepFront = true;
+    RedFatalAlert("\pCan't find X11 libraries",
+                  "\pPlease reinstall X11 or XQuartz. OS upgrades may cause this error.");
+
+    return noErr;
+}
 
 // This handles the situation where we Cmd-Tab to an app, but don't hit it in the Dock
 // (i.e., we don't get a ReOpen event).
-// EVIL CARBON DO NOT TELL STEVE JOBS HE IS A SICK MAN AND THIS WILL LIKELY KILL HIM
+// EVIL CARBON DO NOT TELL THE GHOST OF STEVE JOBS
 static pascal OSStatus AppEventHandlerProc(EventHandlerCallRef callRef, EventRef event, void *x)
 {
    UInt32 eventKind = GetEventKind(event);
