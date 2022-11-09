@@ -1,3 +1,13 @@
+**** READ ME ****
+The only official architecture I am supporting this on right now is
+powermachten because that's the only arch I need it for. Building this
+on other architectures is with your own hacking, at your own leisure!
+To do that, 
+
+	make ppcmt
+
+Cameron Kaiser
+
 =================================
 Installation Notes: NCSA X Mosaic
 =================================

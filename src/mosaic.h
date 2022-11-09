@@ -120,52 +120,52 @@ typedef enum
 /* -------------------------------- MACROS -------------------------------- */
 /* ------------------------------------------------------------------------ */
 
-#define MO_VERSION_STRING "2.7b5"
+#define MO_VERSION_STRING "2.7ck6"
 #define MO_GO_NCSA_COUNT 3  /* Go to the NCSA home page thrice*/
 #define MO_HELP_ON_VERSION_DOCUMENT \
-  mo_assemble_help_url ("help-on-version-2.7b5.html")
+  mo_assemble_help_url ("2.7ck6.html")
 #define MO_DEVELOPER_ADDRESS "mosaic-x@ncsa.uiuc.edu"
 
 #ifndef DOCS_DIRECTORY_DEFAULT
 #define DOCS_DIRECTORY_DEFAULT \
-  "http://www.ncsa.uiuc.edu/SDG/Software/XMosaic"
+  "http://www.floodgap.com/retrotech/machten/mosaic"
 #endif
 
 #ifndef HOME_PAGE_DEFAULT
 /* This must be a straight string as it is included into a struct; 
    no tricks. */
 #define HOME_PAGE_DEFAULT \
-  "http://www.ncsa.uiuc.edu/SDG/Software/Mosaic/NCSAMosaicHome.html"
+  "http://www.floodgap.com/retrotech/machten/mosaic/"
 #endif /* not HOME_PAGE_DEFAULT */
 
 #ifndef WHATSNEW_PAGE_DEFAULT
 #define WHATSNEW_PAGE_DEFAULT \
-  "http://www.ncsa.uiuc.edu/SDG/Software/Mosaic/Docs/whats-new.html"
+  "http://www.floodgap.com/retrotech/machten/mosaic/"
 #endif /* not WHATSNEW_PAGE_DEFAULT */
 
 #ifndef DEMO_PAGE_DEFAULT
 #define DEMO_PAGE_DEFAULT \
-  "http://www.ncsa.uiuc.edu/demoweb/demo.html"
+  "http://www.floodgap.com/retrotech/machten/mosaic/"
 #endif /* not DEMO_PAGE_DEFAULT */
 
 #ifndef HTMLPRIMER_PAGE_DEFAULT
 #define HTMLPRIMER_PAGE_DEFAULT \
-  "http://www.ncsa.uiuc.edu/General/Internet/WWW/HTMLPrimer.html"
+  "http://www.floodgap.com/retrotech/machten/mosaic/"
 #endif /* not HTMLPRIMER_PAGE_DEFAULT */
 
 #ifndef URLPRIMER_PAGE_DEFAULT
 #define URLPRIMER_PAGE_DEFAULT \
-  "http://www.ncsa.uiuc.edu/demoweb/url-primer.html"
+  "http://www.floodgap.com/retrotech/machten/mosaic/"
 #endif /* not URLPRIMER_PAGE_DEFAULT */
 
 #ifndef NETWORK_STARTING_POINTS_DEFAULT
 #define NETWORK_STARTING_POINTS_DEFAULT \
-  "http://www.ncsa.uiuc.edu/SDG/Software/Mosaic/StartingPoints/NetworkStartingPoints.html"
+  "http://www.floodgap.com/retrotech/machten/mosaic/"
 #endif /* not NETWORK_STARTING_POINTS_DEFAULT */
 
 #ifndef INTERNET_METAINDEX_DEFAULT
 #define INTERNET_METAINDEX_DEFAULT \
-  "http://www.ncsa.uiuc.edu/SDG/Software/Mosaic/MetaIndex.html"
+  "http://www.floodgap.com/retrotech/machten/mosaic/"
 #endif /* not INTERNET_METAINDEX_DEFAULT */
 
 #ifndef DOCUMENTS_MENU_SPECFILE
@@ -180,7 +180,9 @@ typedef enum
 #define GLOBAL_TYPE_MAP "/usr/local/lib/mosaic/mailcap"
 #endif
 
-
+#if defined(__MACHTEN__)
+#define MO_MACHINE_TYPE "PowerMachTen"
+#endif
 #if defined(bsdi)
 #define MO_MACHINE_TYPE "BSD/OS"
 #endif

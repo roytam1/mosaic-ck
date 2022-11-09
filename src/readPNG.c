@@ -126,13 +126,13 @@ ReadPNG(FILE *infile,int *width, int *height, XColor *colrs)
     rewind(infile);
 
         /* allocate the structures */
-    png_ptr = (png_struct *)malloc(sizeof(png_struct));
+    png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
     if(!png_ptr)
         return 0;
 
     info_ptr = (png_info *)malloc(sizeof(png_info));
     if(!info_ptr) {
-        free(png_ptr);
+        png_destroy_read_struct(&png_ptr, NULL, NULL);
         return 0;
     }
 
@@ -145,25 +145,19 @@ ReadPNG(FILE *infile,int *width, int *height, XColor *colrs)
         }
 #endif
 
-        png_read_destroy(png_ptr, info_ptr, (png_info *)0); 
+	png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
 
         if(png_pixels != NULL)
             free((char *)png_pixels);
         if(row_pointers != NULL)
             free((png_byte **)row_pointers);
-                
-        free((char *)png_ptr);
-        free((char *)info_ptr);
+	png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
         
         return 0;
     }
 
-    /* SWP -- Hopefully to fix cores on bad PNG files */
-    png_set_message_fn(png_ptr,png_get_msg_ptr(png_ptr),NULL,NULL); 
-
-        /* initialize the structures */
+        /* initialize the structure */
     png_info_init(info_ptr);
-    png_read_init(png_ptr);
     
         /* set up the input control */
     png_init_io(png_ptr, infile);
@@ -409,13 +403,10 @@ ReadPNG(FILE *infile,int *width, int *height, XColor *colrs)
     free((png_byte **)row_pointers);
     
         /* clean up after the read, and free any memory allocated */
-    png_read_destroy(png_ptr, info_ptr, (png_info *)0);
-    
 
-        /* free the structures */
-    free((char *)png_ptr);
-    free((char *)info_ptr);
-    
+        /* free the structure */
+        png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
+
     return pixmap;
 }
 

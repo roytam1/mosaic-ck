@@ -13,6 +13,9 @@ help: dev_
 dev_::
 	@echo "You must specify one of the following or set the environment variable"
 	@echo "[DEV_ARCH] to one of the following:"
+	@echo "-- CURRENTLY SUPPORTED --"
+	@echo "  ppcmt -- PowerPC running Power MachTen 4.1.4 or higher"
+	@echo "-- ARCHIVAL --"
 	@echo "  alpha -- DEC Alpha AXP running OSF/1"
 	@echo "  bsdi -- x86 running BSDI BSD/OS 2.1"
 	@echo "  dec -- DEC 2100 running Ultrix 4.3"
@@ -54,6 +57,14 @@ p_alpha: rm_and_touch
 	$(MAKE) -f makefiles/Makefile.alpha purifyd DEV_ARCH=alpha
 q_alpha: rm_and_touch
 	$(MAKE) -f makefiles/Makefile.alpha quantifyd DEV_ARCH=alpha
+
+dev_ppcmt: rm_and_touch ppcmt
+ppcmt: rm_and_touch
+	$(MAKE) -f makefiles/Makefile.ppcmt DEV_ARCH=ppcmt
+p_ppcmt: rm_and_touch
+	$(MAKE) -f makefiles/Makefile.ppcmt purifyd DEV_ARCH=ppcmt
+q_ppcmt: rm_and_touch
+	$(MAKE) -f makefiles/Makefile.ppcmt quantifyd DEV_ARCH=ppcmt
 
 dev_bsdi: rm_and_touch bsdi
 bsdi: rm_and_touch

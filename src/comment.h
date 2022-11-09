@@ -67,6 +67,7 @@
 #ifndef _COMMENT_H
 #define _COMMENT_H
 
+#ifdef COMMENT_C
 char *comment_card_html_top= \
 "<title>\n" \
 "	Comment Card for Mosaic 2.6\n" \
@@ -293,6 +294,7 @@ char *comment_card_html_bot= \
 "\n" \
 "</form>\n" \
 "\n";
+#endif /* COMMENT_C */
 
 #endif
 

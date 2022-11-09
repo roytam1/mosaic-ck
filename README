@@ -1,3 +1,11 @@
+***** THIS IS MOSAIC 2.7ck6 *****
+This is a hacked version of Mosaic 2.7b5 adjusted for my own personal use and
+to function decently well in today's WWW environment. It is not supported
+by NCSA or UIUC, and arguably I don't support it either, so don't send me
+patches unless you ask first. YOU USE IT AT YOUR OWN RISK. EAT YOUR VEGETABLES. 
+-- Cameron Kaiser
+
+
 NCSA Mosaic for the X Window System Version 2.6
 ===============================================
 

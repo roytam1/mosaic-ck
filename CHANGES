@@ -1,5 +1,13 @@
 See document FEATURES for canonical list of features.
 
+2.7ck6
+------
+ o New version number
+ o Makefile.ppcmt
+ o Character set ignored in MIME types
+ o Patches added for newer LIBPNGs
+ o Default URL changed
+
 From 2.5 to 2.6
 ...............
 

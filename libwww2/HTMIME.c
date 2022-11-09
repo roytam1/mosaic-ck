@@ -574,6 +574,10 @@ PRIVATE void HTMIME_put_character ARGS2(HTStream *, me, char, c)
                 char *tmp;
                 for (tmp = me->value; *tmp; tmp++)
                   *tmp = TOLOWER (*tmp);
+		/* Fix character set by ignoring it */
+		if (tmp = strchr(me->value, ';')) {
+			*tmp = '\0';
+		}
               }
 #ifndef DISABLE_TRACE
               if (www2Trace)

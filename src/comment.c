@@ -62,6 +62,7 @@
 #include "../config.h"
 #include "mosaic.h"
 #include "gui.h"
+#define COMMENT_C
 #include "comment.h"
 
 
