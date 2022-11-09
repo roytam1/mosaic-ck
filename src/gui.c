@@ -966,10 +966,15 @@ mo_status mo_set_current_cached_win (mo_window *win)
 static connect_interrupt = 0;
 extern int sleep_interrupt;
 
-XmxCallback (icon_pressed_cb)
-{
+/* I split this off for a reason; read on. -- Cameron */
+static void sucka_press_my_globe_i_post_his_event() {
   sleep_interrupt = connect_interrupt = 1;
   if (cci_event) MoCCISendEventOutput(MOSAIC_GLOBE);
+}
+
+XmxCallback (icon_pressed_cb)
+{
+	sucka_press_my_globe_i_post_his_event();
 }
 
 
@@ -1475,6 +1480,7 @@ void UpdateButtons (Widget w)
       XButtonEvent *bevent = &(event.xbutton);
       if (bevent->window == XtWindow (current_win->logo))
         {
+	  sucka_press_my_globe_i_post_his_event();
           XtDispatchEvent(&event);
         }
       /* else just throw it away... users shouldn't be pressing buttons
@@ -3368,6 +3374,18 @@ static mo_window *mo_open_window_internal (Widget base, mo_window *parent)
   Widget dialog_pixmap;
   int i;
 
+/* hook here for startup */
+#if(0)
+  char *mos_dir;
+  int rv;
+	rv = get_mosaic_home(&mos_dir);
+	if (rv != SYS_SUCCESS) {
+		fprintf(stderr, "fark: %i\n", rv);
+	} else {
+		fprintf(stderr, "mos dir: %s\n", mos_dir);
+	}
+#endif
+
   win = (mo_window *)malloc (sizeof (mo_window));
   win->id = XmxMakeNewUniqid ();
   XmxSetUniqid (win->id);
@@ -4023,7 +4041,7 @@ static int mo_error_handler (Display *dsp, XErrorEvent *event)
  * remarks: 
  *   
  ****************************************************************************/
-#define IMAGESELECT_FILENAME ".mosaic-imageselect-sites"
+#define IMAGESELECT_FILENAME "mosaic-imageselect-sites"
 
 void setup_imagekill(void) {
 
@@ -4035,7 +4053,7 @@ void setup_imagekill(void) {
     char buf[512];
 
 
-    if (get_home(&home)!=0 || !home) {
+    if (get_mosaic_home(&home)!=0 || !home) {
 		fprintf(stderr,"home: Could not get your home directory.\n");
 		return;
 	}
@@ -4054,7 +4072,7 @@ void setup_imagekill(void) {
     if(!(fp=fopen(imageselect_file_pathname, "r"))) {
 
         fprintf(stderr,
-                "Error: Can't open .mosaic-imageselect-sites file for reading\n");
+                "Error: Can't open mosaic-imageselect-sites file for reading\n");
         return;
     }
 
@@ -4546,6 +4564,7 @@ splash_goto:
     use_default_extension_map = get_pref_boolean(eUSE_DEFAULT_EXTENSION_MAP);
     global_extension_map = get_pref_string(eGLOBAL_EXTENSION_MAP);
 
+/* These we leave in $HOME. They might be used by other things. -- Cameron */
     if (get_pref_string(ePERSONAL_EXTENSION_MAP))
     {
         char *home = getenv ("HOME");
@@ -4704,6 +4723,7 @@ splash_goto:
     mo_init_hotmenu();
 
   /* Write pid into "~/.mosaicpid". */
+/* Cameron sez: this one we'll let stay in $HOME. */
   {
     char *home = getenv ("HOME"), *fnam;
     FILE *fp;

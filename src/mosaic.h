@@ -174,9 +174,10 @@ typedef enum
 
 #ifndef DOCUMENTS_MENU_SPECFILE
 #define DOCUMENTS_MENU_SPECFILE \
-  "/usr/local/lib/mosaic/documents.menu"
+  "~/documents.menu"
 #endif /* not DOCUMENTS_MENU_SPECFILE */
 
+/* In practice we will use mime.types and mailcap in $HOME/mosaic. */
 #ifndef GLOBAL_EXTENSION_MAP
 #define GLOBAL_EXTENSION_MAP "/usr/local/lib/mosaic/mime.types"
 #endif

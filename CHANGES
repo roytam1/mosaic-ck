@@ -1,5 +1,40 @@
 See document FEATURES for canonical list of features.
 
+2.7ck9
+------
+(*) = alternative renderer only
+
+System:
+ o Improved progressive rendering. Images now load asynchronously when the
+   progressive renderer is on (the default).
+ o Shell app for Mac OS X launches X11, gives you a dock icon, and allows
+   Tab switching. The Xcode project is in motifmaclauncher/ for 10.4+.
+ o Clicking the Mosaic icon now causes an unconditional stop. Previously,
+   it could hang if the initial start page was not answering.
+ o Made most file storage relative to $HOME/.mosaic, and added a symlink
+   automatically for ~/Library/Mosaic-CK on Mac OS X systems (these will
+   be created automatically for you if they do not exist). You will need
+   to move your hotlist, annotations and other files there if you are using
+   one. They no longer start with a dot (e.g., move
+   ~/.mosaic-personal-annotations to ~/.mosaic/mosaic-personal-annotations).
+   
+   NB: The only files in $HOME are .mime.types, .mailcap and .newsrc, and
+   .mosaicpid (for compatibility).
+
+ o Preferences are now saved (to ~/.mosaic/mosaic-preferences, natch). However
+   NCSA never finished it, and so this support is incomplete. Many of the
+   exposed preferences do work, but some don't. Gradual improvements to come.
+ o URL bar and text gadgets use a slightly smaller font for more space.
+
+Renderer:
+ o Elements can now be arbitrarily formatted horizontally. This is now
+   exploited with support for left, right and center alignment, and table
+   cells when "mapped" as paragraphs also work the same. Changes made to
+   <p>, <td>, <?l>. (*)
+ o Expanded ampersand escape and UTF-8 space with additional entities. (*)
+ o Initial support for Windows-1252. (*)
+ o <notables> support. (*)
+
 2.7ck8
 ------
  o Initial progressive rendering support (default: "Progressive Rendering")

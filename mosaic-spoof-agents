@@ -6,8 +6,8 @@
 #
 # NOTE! There is a hard limit of 50 agents! Mosaic will not read anymore!
 #
-# This file should be located in your HOME directory under the filename:
-#   .mosaic-spoof-agents
+# This file should be located in $HOME/.mosaic (or Library/Mosaic-CK) named
+#   mosaic-spoof-agents
 #
 # This file consists of lines that begin with a # (comment), a - (a seperator
 #  for the sub-menu off options), a + (this is special...it denotes that the

@@ -8,7 +8,7 @@
 ## and a cast of probably two or three people
 ##
 
-CKVERS=27ck8
+CKVERS=27ck9
 
 all: dev_$(DEV_ARCH)
 
@@ -20,7 +20,7 @@ dev_::
 	@echo "-- CURRENTLY SUPPORTED --"
 	@echo "  ppcmt -- PowerPC running Power MachTen 4.1.4 or higher"
 	@echo "  osx -- Mac OS X 10.4+ PPC OR x86 (earlier possible but unsupported)"
-	@echo "  linux -- Current Linux 2.x, dynamically linked"
+	@echo "  linux -- Current Linux 2.x"
 	@echo "-- USE SOMETHING ELSE UNLESS YOU KNOW WHAT YOU'RE DOING --"
 	@echo "  uosx -- Universal Binary Mac OS X 10.4+"
 	@echo "-- ARCHIVAL (AT YOUR OWN RISK) --"
@@ -230,6 +230,8 @@ clean:
 	cd libnut; $(MAKE) clean
 	cd libwww2; $(MAKE) clean
 	cd src; $(MAKE) clean MOSAIC="Mosaic"
+	rm -f motifmaclauncher/mosaic-mml
+	rm -rf motifmaclauncher/build
 	@echo "Done cleaning..."
 
 dist: clean targz

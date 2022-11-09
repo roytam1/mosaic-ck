@@ -1,3 +1,5 @@
+/* Changes for Mosaic-CK (C) 2010 Cameron Kaiser */
+
 /****************************************************************************
  * NCSA Mosaic for the X Window System                                      *
  * Software Development Group                                               *
@@ -72,7 +74,7 @@ ReadProxies(char *filename)
 	struct ProxyDomain *pCurList, *pNewDomain;
 	extern void FreeProxy();
 		
-	if ((fp = fopen(filename,"r")) == NULL)
+	if ((fp = rfopen(filename,"r")) == NULL)
 		return NULL;
 
 	head = NULL;
@@ -182,7 +184,7 @@ ReadNoProxies(char *filename)
 	struct Proxy *head, *cur, *next, *p;
 	extern void FreeProxy();
 		
-	if ((fp = fopen(filename,"r")) == NULL)
+	if ((fp = rfopen(filename,"r")) == NULL)
 		return NULL;
 
 	head = NULL;

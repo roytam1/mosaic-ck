@@ -146,6 +146,9 @@ static unsigned char *ReadImage();
 extern int srcTrace;
 #endif
 
+/* #undef DISABLE_TRACE
+int srcTrace; */
+
 unsigned char *
 ReadGIF(FILE *fd, int *w, int *h, XColor *colrs, int *bg)
 {
@@ -162,6 +165,7 @@ ReadGIF(FILE *fd, int *w, int *h, XColor *colrs, int *bg)
 	int i;
 
 #ifndef DISABLE_TRACE
+	/* srcTrace = 1; */
 	if (srcTrace) {
 		gettimeofday(&Tv, &Tz);
 		fprintf(stderr, "ReadGIF_DK enter (%d.%d)\n", Tv.tv_sec, Tv.tv_usec);

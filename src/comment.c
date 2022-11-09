@@ -64,6 +64,7 @@
 #include "../config.h"
 #include "mosaic.h"
 #include "gui.h"
+#include "libnut/system.h"
 #define COMMENT_C
 #include "comment.h"
 
@@ -172,6 +173,7 @@ FILE *fp;
 
 char *MakeFilename() {
 
+#if(0)
 char *hptr, home[256], *fname;
 struct passwd *pwdent;
 
@@ -190,11 +192,18 @@ struct passwd *pwdent;
 	else {
 		strcpy(home,hptr);
 	}
+#endif
+	char *home, *hptr, *fname;
+	int rv;
+
+	rv = get_mosaic_home(&home);
+	if (rv != SYS_SUCCESS)
+		return NULL;
 
 	fname=(char *)calloc(strlen(home)+strlen(COMMENT_CARD_FILENAME)+
 			     strlen(MO_VERSION_STRING)+5,sizeof(char));
 	sprintf(fname,"%s/%s%s",home,COMMENT_CARD_FILENAME,MO_VERSION_STRING);
-
+	free(home);
 	return(fname);
 }
 

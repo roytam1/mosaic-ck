@@ -209,13 +209,13 @@ PopupItem *popup_build_user_defs()
   FILE *fp;
   int num, i;
 
-  if ((num=get_home(&str))!=0) 
+  if ((num=get_mosaic_home(&str))!=0) 
     {
       return NULL;
     }
 	
-  file = malloc(sizeof(char) * (strlen(str)+strlen("/.mosaic-user-defs")+1));
-  sprintf(file, "%s/.mosaic-user-defs", str);
+  file = malloc(sizeof(char) * (strlen(str)+strlen("/mosaic-user-defs")+1));
+  sprintf(file, "%s/mosaic-user-defs", str);
   
   free(str);
 

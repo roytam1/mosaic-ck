@@ -835,10 +835,12 @@ XmxCallback (menubar_cb)
     case mo_classic_renderer_inverse:
       classicRenderer = win->classic_renderer =
 	(win->classic_renderer ? 0 : 1);
+      set_pref_boolean(eBETTER_RENDERER, classicRenderer ? True : False);
       mo_reload_window_text (win, 0);
       break;
     case mo_table_support:
       tableSupportEnabled = win->table_support = (win->table_support ? 0 : 1);
+      set_pref_boolean(eENABLE_TABLES, tableSupportEnabled ? True : False);
       break;
     case mo_body_color:
 	win->body_color = (win->body_color ? 0 : 1);
@@ -868,6 +870,8 @@ XmxCallback (menubar_cb)
     case mo_delay_image_loads:
       win->delay_image_loads =
         (win->delay_image_loads ? 0 : 1);
+      set_pref_boolean(eDELAY_IMAGE_LOADS, win->delay_image_loads ? True :
+		False);
       XmxSetArg (WbNdelayImageLoads, win->delay_image_loads ? True : False);
       XmxSetValues (win->scrolled_win);
       XmxRSetSensitive (win->menubar, mo_expand_images_current,
@@ -894,6 +898,8 @@ XmxCallback (menubar_cb)
     case mo_progressive_rendering:
       progressiveRendering = win->progressive_rendering =
 	(win->progressive_rendering ? 0 : 1);
+      set_pref_boolean(ePROGRESSIVE_RENDERING, win->progressive_rendering
+	? True : False);
       XmxSetValues (win->scrolled_win);
       break;
     case mo_large_fonts:

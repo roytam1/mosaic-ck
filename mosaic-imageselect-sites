@@ -1,8 +1,8 @@
 #
 # Image delay-loading - selection by URL substring
 #
-# This file should be located in your HOME directory under the filename:
-#   .mosaic-imageselect-sites
+# This file should be located in $HOME/.mosaic (or Library/Mosaic-CK) named
+#   mosaic-imageselect-sites
 #
 # This file consists of lines that begin with a # (comment), blank lines,
 # or lines that start with "delay" or "kill."

@@ -2,7 +2,7 @@
 You must have libz 1.2.3+ (prerequisite for libpng), libjpeg 6b and libpng
 1.2.35+ installed. You must also have Motif of some kind; see below.
 
-As of 2.7ck8, the only targets supported are
+As of 2.7ck9, the only targets supported are
 
 	make ppcmt
 		Power MachTen (needs 256MB RAM; see doc page for smaller)
@@ -43,12 +43,23 @@ As of 2.7ck8, the only targets supported are
 		want this and is only for my use to make the UB Mosaic build.
 		Use regular make osx unless you know exactly what you're doing.
 
+HEY MAC NERDS -- CHECK OUT MOTIFMACLAUNCHER!
+This is an Xcode project that builds a little shell app giving you a dock
+icon and Cmd-Tab switching (brings X11 to the front) as if it were an almost
+first class Mac app. Works on 10.4 - 10.6. After you build your Mosaic
+executable, fire up  motifmaclauncher/MMLM.xcodeproj and generate yourself
+an app. AWESOMENESS! (GPL code stolen from and much better than GIMP.app's.
+Compiles for Universal against my better judgment. PowerPC FOREVER!)
+Xcode 2.5 is required. If you are on Tiger and still have 2.4.1, get it from
+(free ADC membership required)
+http://connect.apple.com/cgi-bin/WebObjects/MemberSite.woa/wa/getSoftware?bundleID=19907
+
 	make linux
 		>>>> This is what most Linux users will want <<<<
 
 		Graciously provided by Jeroen Schot. This was tested on
 		Debian 5.0 but I would be surprised if it didn't work most
-		other places, and builds a dynamically linked Mosaic.
+		other places, and builds a partially statically linked Mosaic.
 		Make sure you install all the prereqs (zlib, libjpeg, libpng,
 		Motif) first -- most are probably already on your distro.
 

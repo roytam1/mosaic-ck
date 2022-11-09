@@ -1,3 +1,5 @@
+/* Changes for Mosaic-CK (C)2010 Cameron Kaiser */
+
 /****************************************************************************
  * NCSA Mosaic for the X Window System                                      *
  * Software Development Group                                               *
@@ -200,6 +202,8 @@ typedef struct _HTMLPart
 	Dimension		view_height;
 	int			doc_width;
 	int			doc_height;
+	int			center_tag_depth; /* ck */
+	int			para_h_alignment; /* ck */
 	int			scroll_x;
 	int			scroll_y;
 	Boolean			use_hbar;

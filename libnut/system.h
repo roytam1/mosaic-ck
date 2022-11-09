@@ -21,3 +21,4 @@ char **buildArgv(char *cmd, int *new_argc);
 int my_copy(char *, char *, char *, int, int);
 int file_exists(char *);
 int get_home(char **);
+int get_mosaic_home(char **);

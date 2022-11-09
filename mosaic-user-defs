@@ -1,6 +1,5 @@
-# This file is part of Mosaic and is only useful if it is in
-#
-#                $HOME/.mosaic-user-defs 
+# This file should be located in $HOME/.mosaic (or Library/Mosaic-CK) named
+#                mosaic-user-defs 
 # 
 # If you want to use the functionality herein described move this file
 # to that location. -- TPR

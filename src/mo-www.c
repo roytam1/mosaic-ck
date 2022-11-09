@@ -1287,11 +1287,11 @@ FILE *fp;
 char fname[BUFSIZ],buf[512];
 char *homedir,*ptr;
 
-	if (get_home(&homedir)!=0 || !homedir) {
+	if (get_mosaic_home(&homedir)!=0 || !homedir) {
 		fprintf(stderr,"home: Could not get your home directory.\n");
 		return;
 	}
-	sprintf(fname,"%s/.mosaic-spoof-agents",homedir);
+	sprintf(fname,"%s/mosaic-spoof-agents",homedir);
 	free(homedir);
 
 	if (!(fp=fopen(fname,"r"))) {

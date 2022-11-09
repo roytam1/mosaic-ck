@@ -332,10 +332,13 @@ int get_pref_int(long pref_id);
 Boolean get_pref_boolean(long pref_id);
 float get_pref_float(long pref_id);
 
-void set_pref_boolean(long pref_id, int value);
+void set_pref_boolean(long pref_id, Boolean value);
 void set_pref(long pref_id, void *incoming);
+void set_pref_solid(long pref_id, void *incoming, int iincoming, Boolean bincoming);
 
 void mo_preferences_dialog(mo_window *win);
+
+FILE *rfopen(char *path, char *mode); /* for Mosaic-CK */
 
 
 #endif

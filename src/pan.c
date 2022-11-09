@@ -1,3 +1,5 @@
+/* Changes for Mosaic-CK (c)2010 Cameron Kaiser */
+
 /****************************************************************************
  * NCSA Mosaic for the X Window System                                      *
  * Software Development Group                                               *
@@ -58,6 +60,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include "libhtmlw/HTML.h"
+#include "libnut/system.h"
 
 /*for memset*/
 #include <memory.h>
@@ -447,14 +450,21 @@ mo_status mo_setup_pan_list (void)
   char *default_directory = get_pref_string(ePRIVATE_ANNOTATION_DIRECTORY);
   char *default_filename = PAN_LOG_FILENAME;
   char *filename;
+  int rv;
 
   mo_init_pan ();
 
+#if(0)
   home = getenv ("HOME");
-
   /* This shouldn't happen. */
   if (!home)
     home = "/tmp";
+#else
+  rv = get_mosaic_home(&home);
+  /* This shouldn't happen. */
+  if (rv != SYS_SUCCESS)
+	home = "/tmp";
+#endif
   
   filename = (char *)malloc 
     ((strlen (home) + strlen (default_directory) + 

@@ -489,7 +489,7 @@ PUBLIC void HTFileInit NOARGS
 
 #define MAX_STRING_LEN 256
 
-static int getline(char *s, int n, FILE *f) 
+static int mgetline(char *s, int n, FILE *f) 
 {
   register int i=0;
   
@@ -553,7 +553,7 @@ int HTLoadExtensionsConfigFile (char *fn)
       return -1;
     }
 
-  while(!(getline(l,MAX_STRING_LEN,f))) 
+  while(!(mgetline(l,MAX_STRING_LEN,f))) 
     {
       /* always get rid of leading white space for "line" -- SWP */
       for (ptr=l; *ptr && isspace(*ptr); ptr++);

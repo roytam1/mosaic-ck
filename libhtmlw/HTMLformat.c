@@ -218,12 +218,12 @@ static int CompWordLen = 0;
  * Create a formatted element
  */
 struct ele_rec *
-CreateElement(hw, type, fp, x, y, edata, w, h, bw)
+CreateElement(hw, type, fp, x, y, edata, w, h, a, bw)
 	HTMLWidget hw;
 	int type;
 	XFontStruct *fp;
 	int x, y;
-	char *edata, *w, *h;
+	char *edata, *w, *h, *a;
 	int bw;
 {
 	struct ele_rec *eptr;
@@ -253,12 +253,21 @@ CreateElement(hw, type, fp, x, y, edata, w, h, bw)
 	eptr->table_data = NULL;
 	eptr->font = fp;
 	eptr->alignment = ALIGN_BOTTOM;
+	eptr->h_alignment = (classic_renderer) ? ALIGN_LEFT :
+		(hw->html.para_h_alignment != ALIGN_HORIZ_ANY) ?
+			hw->html.para_h_alignment :
+		(hw->html.center_tag_depth) ? ALIGN_CENTER : ALIGN_LEFT;
+#ifdef LAYOUT_DEBUG
+	fprintf(stderr, "new element alignment: %i\n", eptr->h_alignment);
+#endif
 	eptr->selected = False;
 	eptr->internal = Internal;
 	eptr->strikeout = Strikeout;
 	eptr->bwidth = bw;
 	eptr->x = x;
 	eptr->y = y;
+	eptr->x_offset = 0;
+	eptr->bad_mojo = False;
 	eptr->y_offset = 0;
 	eptr->width = 0;
 	eptr->line_number = LineNumber;
@@ -277,8 +286,6 @@ CreateElement(hw, type, fp, x, y, edata, w, h, bw)
 			 */
 			ElementId++;
 			eptr->ele_id = ElementId;
-
-			eptr->y_offset = 0;
 
 			eptr->edata_len = strlen(edata) + 1;
 			eptr->edata = (char *)malloc(eptr->edata_len);
@@ -537,6 +544,14 @@ CreateElement(hw, type, fp, x, y, edata, w, h, bw)
 			ElementId++;
 			eptr->ele_id = ElementId;
 
+			/* See if align == right ... Cameron */
+			if (!classic_renderer) {
+				if(a != NULL &&
+					(my_strcasecmp(a, "RIGHT") == 0)) {
+					eptr->h_alignment = ALIGN_RIGHT;
+				}
+			}
+
 			/*
 			 * Images can't be underlined!
 			 */
@@ -598,10 +613,11 @@ CreateElement(hw, type, fp, x, y, edata, w, h, bw)
 
 				/*
 				 * See if this is a special internal image
+				 * Null-length src is treated as "internal"
 				 */
-				if ((edata != NULL)&&
+				if ((edata != NULL)&& (strlen(edata) == 0 ||
 					(strncmp(edata, INTERNAL_IMAGE,
-					strlen(INTERNAL_IMAGE)) == 0))
+					strlen(INTERNAL_IMAGE)) == 0)))
 				{
 					internal = 1;
 				}
@@ -614,7 +630,8 @@ CreateElement(hw, type, fp, x, y, edata, w, h, bw)
 				 * if we delay image fetching
 				 * internal images are not delayed.
 				 */
-				if (((hw->html.delay_images == True) &&
+				if (((hw->html.delay_images == True
+					|| progressive_rendering) &&
 					(!internal)) ||
                     currently_delaying_images == 1 )
 				{
@@ -836,13 +853,13 @@ CreateElement(hw, type, fp, x, y, edata, w, h, bw)
  * list position if possible, otherwise allocate a new list position.
  */
 void
-SetElement(hw, type, fp, x, y, edata, w, h, bw)
+SetElement(hw, type, fp, x, y, edata, w, h, a, bw)
 	HTMLWidget hw;
 	int type;
 	XFontStruct *fp;
 	int x, y;
 	char *edata;
-	char *w, *h;
+	char *w, *h, *a;
 	int bw;
 {
 	struct ele_rec *eptr;
@@ -866,7 +883,7 @@ SetElement(hw, type, fp, x, y, edata, w, h, bw)
 	if ((hw->html.formatted_elements == NULL)||
 		((Current != NULL)&&(Current->next == NULL)))
 	{
-		eptr = CreateElement(hw, type, fp, x, y, edata, w, h, bw);
+		eptr = CreateElement(hw, type, fp, x, y, edata, w, h, a, bw);
 		Current = AddEle(&(hw->html.formatted_elements), Current, eptr);
 		return;
 	}
@@ -899,12 +916,23 @@ SetElement(hw, type, fp, x, y, edata, w, h, bw)
 	eptr->table_data = NULL;
 	eptr->font = fp;
 	eptr->alignment = ALIGN_BOTTOM;
+	eptr->h_alignment = (classic_renderer) ? ALIGN_LEFT :
+		(hw->html.para_h_alignment != ALIGN_HORIZ_ANY) ?
+			hw->html.para_h_alignment :
+		(hw->html.center_tag_depth) ? ALIGN_CENTER : ALIGN_LEFT;
+#ifdef LAYOUT_DEBUG
+	fprintf(stderr, "formatted element alignment: %i (%i)\n",
+		eptr->h_alignment,
+		hw->html.center_tag_depth);
+#endif
 	eptr->selected = False;
 	eptr->internal = Internal;
 	eptr->strikeout = Strikeout;
 	eptr->bwidth = bw;
 	eptr->x = x;
 	eptr->y = y;
+	eptr->x_offset = 0;
+	/* eptr->bad_mojo = False; NO! DON'T DO THIS! */
 	eptr->y_offset = 0;
 	eptr->width = 0;
 	eptr->line_number = LineNumber;
@@ -923,8 +951,6 @@ SetElement(hw, type, fp, x, y, edata, w, h, bw)
 			 */
 			ElementId++;
 			eptr->ele_id = ElementId;
-
-			eptr->y_offset = 0;
 
 			len = strlen(edata) + 1;
 			if (len > eptr->edata_len)
@@ -1252,6 +1278,14 @@ SetElement(hw, type, fp, x, y, edata, w, h, bw)
 			ElementId++;
 			eptr->ele_id = ElementId;
 
+			/* See if align == right ... Cameron */
+			if (!classic_renderer) {
+				if(a != NULL &&
+					(my_strcasecmp(a, "RIGHT") == 0)) {
+					eptr->h_alignment = ALIGN_RIGHT;
+				}
+			}
+
 			/*
 			 * Images can't be underlined!
 			 */
@@ -1353,7 +1387,8 @@ SetElement(hw, type, fp, x, y, edata, w, h, bw)
 				 * if we delay image fetching
 				 * internal images are not delayed.
 				 */
-				if (((hw->html.delay_images == True) &&
+				if (((hw->html.delay_images == True
+					|| progressive_rendering) &&
 					(!internal)) ||
                     currently_delaying_images == 1 )
 				{
@@ -1634,7 +1669,7 @@ LinefeedPlace(hw, x, y)
 		MaxWidth = *x + hw->html.margin_width;
 	}
 
-	SetElement(hw, E_LINEFEED, currentFont, *x, *y, (char *)NULL,NULL,NULL,IMAGE_DEFAULT_BORDER);
+	SetElement(hw, E_LINEFEED, currentFont, *x, *y, (char *)NULL,NULL,NULL,NULL,IMAGE_DEFAULT_BORDER);
 }
 
 
@@ -1946,7 +1981,7 @@ BulletPlace(hw, x, y)
 
 	NeedSpace = 0;
 	width = hw->html.font->max_bounds.width;
-	SetElement(hw, E_BULLET, hw->html.font, *x, *y, (char *)NULL, NULL, NULL,IMAGE_DEFAULT_BORDER);
+	SetElement(hw, E_BULLET, hw->html.font, *x, *y, (char *)NULL, NULL, NULL,NULL,IMAGE_DEFAULT_BORDER);
 	LineHeight = l_height;
 /*
  * This should reall be here, but it is a hack for headers on list
@@ -1968,7 +2003,7 @@ HRulePlace(hw, x, y, width)
 {
 	NeedSpace = 0;
 	*x = hw->html.margin_width;
-	SetElement(hw, E_HRULE, currentFont, *x, *y, (char *)NULL, NULL, NULL, IMAGE_DEFAULT_BORDER);
+	SetElement(hw, E_HRULE, currentFont, *x, *y, (char *)NULL, NULL, NULL, NULL, IMAGE_DEFAULT_BORDER);
 	*x = *x + width - (2 * hw->html.margin_width);
 	NeedSpace = 1;
 	PF_LF_State = 0;
@@ -2005,7 +2040,7 @@ ListNumberPlace(hw, x, y, val)
 	buf[width] = ' ';
 	buf[width + 1] = '\0';
 
-	SetElement(hw, E_TEXT, currentFont, my_x, *y, buf, NULL, NULL, IMAGE_DEFAULT_BORDER);
+	SetElement(hw, E_TEXT, currentFont, my_x, *y, buf, NULL, NULL, NULL, IMAGE_DEFAULT_BORDER);
 	AdjustBaseLine();
 	CharsInLine = CharsInLine + strlen(buf);
 
@@ -2181,7 +2216,9 @@ PreformatPlace(hw, mptr, x, y, width)
 				if ((line != NULL)&&(line[0] != '\0'))
 				{
 					SetElement(hw, E_TEXT, currentFont,
-							line_x, *y, line, NULL, NULL, IMAGE_DEFAULT_BORDER);
+							line_x, *y, line,
+							NULL, NULL, NULL,
+							IMAGE_DEFAULT_BORDER);
 					/*
 					 * Save width here to avoid an 
 					 * XTextExtents call later.
@@ -2245,7 +2282,8 @@ PreformatPlace(hw, mptr, x, y, width)
 	if ((line != NULL)&&(line[0] != '\0'))
 	{
 		SetElement(hw, E_TEXT, currentFont,
-				line_x, *y, line, NULL, NULL, IMAGE_DEFAULT_BORDER);
+				line_x, *y, line, NULL, NULL, NULL,
+				IMAGE_DEFAULT_BORDER);
 		/*
 		 * Save width here to avoid an 
 		 * XTextExtents call later.
@@ -2261,6 +2299,7 @@ PreformatPlace(hw, mptr, x, y, width)
 
 /*
  * Format and place a piece of text. Add an element record for it.
+ * This is where we will do text alignment. -- Cameron
  */
 void
 FormatPlace(hw, mptr, x, y, width)
@@ -2330,7 +2369,7 @@ FormatPlace(hw, mptr, x, y, width)
 			 * nobreak is a horrible hack that specifies special
 			 * conditions where line breaks are just not allowed
 			 */
-			nobreak = 0;
+			nobreak = 0; /* NOBR should go here probably */
 
 			tchar = *end;
 			*end = '\0';
@@ -2473,7 +2512,9 @@ FormatPlace(hw, mptr, x, y, width)
 				if ((line != NULL)&&(line[0] != '\0'))
 				{
 					SetElement(hw, E_TEXT, currentFont,
-							line_x, *y, line, NULL, NULL, IMAGE_DEFAULT_BORDER);
+							line_x, *y, line,
+							NULL, NULL, NULL,
+							IMAGE_DEFAULT_BORDER);
 					/*
 					 * Save width here to avoid an 
 					 * XTextExtents call later.
@@ -2626,7 +2667,9 @@ FormatPlace(hw, mptr, x, y, width)
 				if ((line != NULL)&&(line[0] != '\0'))
 				{
 					SetElement(hw, E_TEXT, currentFont,
-							line_x, *y, line, NULL, NULL, IMAGE_DEFAULT_BORDER);
+							line_x, *y, line,
+							NULL, NULL, NULL,
+							 IMAGE_DEFAULT_BORDER);
 					/*
 					 * Save width here to avoid an 
 					 * XTextExtents call later.
@@ -2654,7 +2697,8 @@ FormatPlace(hw, mptr, x, y, width)
 	if ((line != NULL)&&(line[0] != '\0'))
 	{
 		SetElement(hw, E_TEXT, currentFont,
-				line_x, *y, line, NULL, NULL, IMAGE_DEFAULT_BORDER);
+				line_x, *y, line, NULL, NULL, NULL,
+				IMAGE_DEFAULT_BORDER);
 		/*
 		 * Save width here to avoid an 
 		 * XTextExtents call later.
@@ -2689,7 +2733,8 @@ int extra;
 	extra = 10;
 
 	LineFeed(hw, x, y); 
-	SetElement(hw, E_TABLE, currentFont, *x, *y, (char *) mptr, NULL, NULL, IMAGE_DEFAULT_BORDER); 
+	SetElement(hw, E_TABLE, currentFont, *x, *y, (char *) mptr,
+		NULL, NULL, NULL, IMAGE_DEFAULT_BORDER); 
 	if (!Current->table_data) {
 		/* no table */
 		return;
@@ -2706,6 +2751,7 @@ int extra;
 
 /*
  * Place an image. Add an element record for it.
+ * Handle ALIGN if we are not classic. (Cameron)
  */
 void
 ImagePlace(hw, mptr, x, y, width)
@@ -2715,7 +2761,7 @@ ImagePlace(hw, mptr, x, y, width)
 	unsigned int width;
 {
 	char *tptr,*tmpPtr;
-	char *wTmp,*hTmp;
+	char *wTmp,*hTmp,*aTmp;
 	int border_width;
 
 #ifdef SPACE_HACK
@@ -2744,7 +2790,7 @@ ImagePlace(hw, mptr, x, y, width)
 			strlen(tptr), &dir, &ascent,
 			&descent, &all);
 		SetElement(hw, E_TEXT, currentFont,
-			*x, *y, tptr, NULL, NULL, IMAGE_DEFAULT_BORDER);
+			*x, *y, tptr, NULL, NULL, NULL, IMAGE_DEFAULT_BORDER);
 		/*
 		 * Save width here to avoid an 
 		 * XTextExtents call later.
@@ -2797,11 +2843,20 @@ ImagePlace(hw, mptr, x, y, width)
 	else if ((border_width=atoi(tptr))<0) {
 		border_width=0;
 	}
+
+	if (!classic_renderer) {
+		tptr = ParseMarkTag(mptr->start, MT_IMAGE, "ALIGN");
+		if (!tptr)
+			tptr = ParseMarkTag(mptr->start, MT_FIGURE, "ALIGN");
+		aTmp = tptr;
+	}
+
 	if (tptr) {
 		free(tptr);
 	}
 
-	SetElement(hw, E_IMAGE, currentFont, *x, *y, tmpPtr, wTmp, hTmp, border_width);
+	SetElement(hw, E_IMAGE, currentFont, *x, *y, tmpPtr,
+		wTmp, hTmp, aTmp, border_width);
 
 	/*
 	 * Only after we have placed the image do we know its dimensions.
@@ -2834,7 +2889,8 @@ ImagePlace(hw, mptr, x, y, width)
 		{
 			Current = Current->prev;
 			LineFeed(hw, x, y);
-			SetElement(hw, E_IMAGE, currentFont, *x, *y, tmpPtr, wTmp, hTmp, border_width);
+			SetElement(hw, E_IMAGE, currentFont, *x, *y,
+				tmpPtr, wTmp, hTmp, aTmp, border_width);
 		}
 	}
 	/*
@@ -3072,16 +3128,16 @@ ImagePlace(hw, mptr, x, y, width)
 	PF_LF_State = 0;
 	NeedSpace = 1;
 	if (progressive_rendering) {
-/*
+#ifdef LAYOUT_DEBUG
 		fprintf(stderr, "image was loaded\n");
-*/
+#endif
 		if (prog_widget_disable) {
 			/* don't try to update if widgets were present
 				on the PRECEDING page (they don't get
 				cleaned up properly). */
-/*
+#ifdef LAYOUT_DEBUG
 			fprintf(stderr, "but we have widgets");
-*/
+#endif
 		} else {
                 	ScrollWidgets(hw);
                 	ViewClearAndRefresh(hw); 
@@ -3103,7 +3159,8 @@ WidgetPlace(hw, mptr, x, y, width)
 	int *x, *y;
 	unsigned int width;
 {
-	SetElement(hw, E_WIDGET, currentFont, *x, *y, mptr->start,NULL,NULL,IMAGE_DEFAULT_BORDER);
+	SetElement(hw, E_WIDGET, currentFont, *x, *y, mptr->start,
+		NULL,NULL, NULL, IMAGE_DEFAULT_BORDER);
 
 	/*
 	 * Only after we have placed the widget do we know its dimensions.
@@ -3125,7 +3182,8 @@ WidgetPlace(hw, mptr, x, y, width)
 			Current = Current->prev;
 			LineFeed(hw, x, y);
 			SetElement(hw, E_WIDGET, currentFont, *x, *y,
-				mptr->start,NULL,NULL,IMAGE_DEFAULT_BORDER);
+				mptr->start,NULL,NULL, NULL,
+				IMAGE_DEFAULT_BORDER);
 		}
 	}
 
@@ -3515,6 +3573,11 @@ TriggerMarkChanges(hw, mptr, x, y)
 		}
 	}
 
+	/* This is always ignored. */
+	if (type == M_OPTIONAL && !classic_renderer) {
+		Ignore = (mark->is_end) ? 0 : 1;
+	}
+
 	/*
 	 * If Ignore is set, we ignore all further elements until we get to the
 	 * end of the Ignore
@@ -3609,6 +3672,18 @@ TriggerMarkChanges(hw, mptr, x, y)
 				Ignore = 1;
 				TitleText = NULL;
 			}
+			break;
+		case M_CENTER: /* ck */
+			ConditionalLineFeed(hw, x, y, 1);
+			if (mark->is_end) {
+				if (hw->html.center_tag_depth > 0)
+					hw->html.center_tag_depth--;
+			} else {
+				hw->html.center_tag_depth++;
+			}
+#ifdef LAYOUT_DEBUG
+			fprintf(stderr, "center: %i\n", hw->html.center_tag_depth);
+#endif
 			break;
 		/*
 		 * Formatting commands just change the current font.
@@ -3969,10 +4044,38 @@ TriggerMarkChanges(hw, mptr, x, y)
 		/*
 		 * Just insert a linefeed, or ignore if this is prefomatted
 		 * text because the <P> will be followed be a linefeed.
+		 * Cameron sez: add code for <p align ...>
 		 */
+		case M_TPARAGRAPH:
 		case M_PARAGRAPH:
 			ConditionalLineFeed(hw, x, y, 1);
-			ConditionalLineFeed(hw, x, y, 2);
+			if (!classic_renderer && mark->is_end) {
+				if (type == M_TPARAGRAPH ||
+					hw->html.para_h_alignment != ALIGN_LEFT)
+				hw->html.para_h_alignment = ALIGN_HORIZ_ANY;
+			} else {
+				ConditionalLineFeed(hw, x, y, 2);
+				/* <td> defaults to left, not "any". */
+				hw->html.para_h_alignment =
+					(type == M_TPARAGRAPH) ? ALIGN_LEFT :
+					(hw->html.para_h_alignment ==
+						ALIGN_LEFT) ? ALIGN_LEFT
+						: ALIGN_HORIZ_ANY;
+				if (!classic_renderer) {
+					tptr = ParseMarkTag(mark->start,
+						MT_PARAGRAPH, AL_ALIGN);
+					if (tptr != NULL) {
+						if
+(my_strcasecmp(tptr, "left") == 0)  hw->html.para_h_alignment = ALIGN_LEFT;
+						if
+(my_strcasecmp(tptr, "center") == 0) hw->html.para_h_alignment = ALIGN_CENTER;
+/* don't do RIGHT if this is a table cell: it will probably look weird.
+   force to left. */
+						if (type != M_TPARAGRAPH &&
+ my_strcasecmp(tptr, "right") == 0) hw->html.para_h_alignment = ALIGN_RIGHT;
+					}
+				}
+			}
 			break;
 		/*
 		 * Just insert the image for now
@@ -4469,6 +4572,9 @@ TriggerMarkChanges(hw, mptr, x, y)
 		case M_MENU:
 		case M_DIRECTORY:
 			ConditionalLineFeed(hw, x, y, 1);
+			/* kludge for table cells */
+			if (hw->html.para_h_alignment != ALIGN_LEFT)
+				hw->html.para_h_alignment = ALIGN_HORIZ_ANY;
 			width = hw->html.font->max_bounds.width;
 			/*
 			 * If this is the outermost level of indentation,
@@ -4887,6 +4993,8 @@ FormatChunk(hw, x, y)
 	 * Format all objects
 	 */
 	mptr = hw->html.html_objects;
+	hw->html.center_tag_depth = 0; /* reset this count */
+	hw->html.para_h_alignment = ALIGN_HORIZ_ANY;
 	Last = NULL;  
 	while (mptr != NULL)
 	{
@@ -5177,6 +5285,11 @@ LinefeedRefresh(hw, eptr)
 	int x1, y1;
 	unsigned int width, height;
 
+/*
+fprintf(stderr, "warning: skipping linefeed\n");
+return;
+*/
+
 #ifdef NO_EXTRA_FILLS
 	/*
 	 * The actualt height of the rectangle to fill is strange, based
@@ -5240,6 +5353,14 @@ LinefeedRefresh(hw, eptr)
 	else
 	{
 		XSetForeground(XtDisplay(hw), hw->html.drawGC, eptr->bg);
+	}
+
+	if (eptr->x_offset) {
+		x1 += eptr->x_offset;
+		width -= eptr->x_offset;
+		if (width < 1) {
+			return;
+		}
 	}
 
 	/* Don't draw out past the end of the text if selecting */
@@ -5306,13 +5427,13 @@ PartialRefresh(hw, eptr, start_pos, end_pos, fg, bg)
 		XTextExtents(eptr->font, (char *)eptr->edata,
 			start_pos, &dir, &nascent, &descent, &all);
 #endif /* ASSUME_FIXED_WIDTH_PRE */
-		x = eptr->x + all.width;
+		x = eptr->x + all.width + eptr->x_offset;
 		tdata = (char *)(eptr->edata + start_pos);
 		partial = 1;
 	}
 	else
 	{
-		x = eptr->x;
+		x = eptr->x + eptr->x_offset;
 		tdata = (char *)eptr->edata;
 	}
 
@@ -5330,6 +5451,7 @@ PartialRefresh(hw, eptr, start_pos, end_pos, fg, bg)
 
 	x = x - hw->html.scroll_x;
 	y = y - hw->html.scroll_y;
+
 
 #ifndef NO_EXTRA_FILLS
 	{
@@ -5386,6 +5508,7 @@ PartialRefresh(hw, eptr, start_pos, end_pos, fg, bg)
 				   (unsigned int)all.width, (unsigned int)height);
 		}
 		width = all.width;
+
 	}
 #endif /* NO_EXTRA_FILLS */
 
@@ -5609,7 +5732,7 @@ BulletRefresh(hw, eptr)
 		line_height = eptr->font->max_bounds.ascent +
 			eptr->font->max_bounds.descent;
 	}
-	x1 = eptr->x;
+	x1 = eptr->x + eptr->x_offset;
 	y1 = eptr->y + eptr->y_offset + (line_height / 2) - (width / 4);
 	x1 = x1 - hw->html.scroll_x;
 	y1 = y1 - hw->html.scroll_y;
@@ -5732,7 +5855,13 @@ HRuleRefresh(hw, eptr)
 #endif
 }
 
+void
+IndentRefresh(hw, width)
+	HTMLWidget hw;
+	int width;
+{
 
+}
 /*
  * Redraw a formatted image element.
  * The color of the image border reflects whether it is an active anchor
@@ -5754,7 +5883,7 @@ XGCValues values;
 	{
 		int x, y, extra;
 
-		x = eptr->x;
+		x = eptr->x + eptr->x_offset;
 		y = eptr->y + eptr->y_offset;
 
 		if ((hw->html.border_images == True)||
@@ -6005,6 +6134,7 @@ RefreshTextRange(hw, start, end)
 
 /*
  * Refresh all elements on a single line into the widget's window
+ * This is our "reflow"
  */
 void
 PlaceLine(hw, line)
@@ -6013,11 +6143,91 @@ PlaceLine(hw, line)
 {
 	struct ele_rec *eptr;
 	XGCValues values;
+	int cum_width;
+	int target_offset;
+	int last_h_alignment;
+	int pwidth;
 
 	/*
 	 * Item list for this line
 	 */
 	eptr = hw->html.line_array[line];
+
+	/*
+	 * Figure out how this line should be, er, aligned horizontally.
+	 * If we are centered or right justified, we need to do additional
+	 * work before we can display this line.
+	 */
+	cum_width = 0;
+	if (!classic_renderer) {
+		/* Make sure our line agrees on layout. Right now, we
+		   can't handle the case of multiple objects on the line
+		   being aligned differently. Future reflow case? */
+		last_h_alignment = -1;
+#ifdef LAYOUT_DEBUG
+		fprintf(stderr, "line layout: ");
+#endif
+		while ((eptr != NULL)&&(eptr->line_number == (line + 1))) {
+		 /* Optimization: compute our cumulative width at the same
+		    time. We throw it away if we don't need it. */
+#ifdef LAYOUT_DEBUG
+			fprintf(stderr, "%i %i - ", last_h_alignment,
+				eptr->h_alignment);
+#endif
+			eptr->x_offset = 0;
+			if (eptr->type == E_IMAGE &&
+				eptr->pic_data != NULL) {
+				cum_width += eptr->pic_data->width +
+					eptr->bwidth +
+					eptr->bwidth;
+			} else {
+				cum_width += eptr->width;
+			}
+			if (last_h_alignment == -1) {
+				last_h_alignment = eptr->h_alignment;
+				eptr = eptr->next;
+				continue;
+			}
+			if (last_h_alignment != eptr->h_alignment) {
+				last_h_alignment = -1;
+#ifdef LAYOUT_DEBUG
+				fprintf(stderr, "XXX %i", eptr->h_alignment);
+#endif
+				break;
+			}
+			eptr = eptr->next;
+		}
+		eptr = hw->html.line_array[line];
+		target_offset = 0;
+		if (last_h_alignment != -1 && last_h_alignment != ALIGN_LEFT) {
+			/* We agree it should be something different. Now we
+			   need to know the width of this line. */
+#ifdef LAYOUT_DEBUG
+			fprintf(stderr, " - width: %i\n", cum_width);
+#endif
+			pwidth = hw->html.view_width - hw->html.margin_width ;
+			if (last_h_alignment == ALIGN_CENTER) {
+				/* Our page width is view width - margin. */
+				if (pwidth > cum_width && cum_width > 0)
+					target_offset =
+					(pwidth - cum_width) / 2;
+			}
+			if (last_h_alignment == ALIGN_RIGHT) {
+				if (pwidth > cum_width && cum_width > 0)
+					target_offset = pwidth - cum_width;
+			}
+			while ((eptr != NULL)&&(eptr->line_number
+					== (line + 1))) {
+				eptr->x_offset = target_offset;
+				eptr = eptr->next;
+			}
+			eptr = hw->html.line_array[line];
+		} else {
+#ifdef LAYOUT_DEBUG
+			fprintf(stderr, " left align\n");
+#endif
+		}
+	}
 
 	while ((eptr != NULL)&&(eptr->line_number == (line + 1)))
 	{
@@ -6251,11 +6461,11 @@ LocateElement(hw, x, y, pos)
 			int dir, ascent, descent;
 			XCharStruct all;
 
-			tx1 = eptr->x;
+			tx1 = eptr->x + eptr->x_offset;
 			XTextExtents(eptr->font, (char *)eptr->edata,
 					eptr->edata_len - 1, &dir,
 					&ascent, &descent, &all);
-			tx2 = eptr->x + all.width;
+			tx2 = eptr->x + all.width + eptr->x_offset;
 			if ((x >= tx1)&&(x <= tx2)&&(y >= ty1)&&(y <= ty2))
 			{
 				rptr = eptr;
@@ -6264,8 +6474,8 @@ LocateElement(hw, x, y, pos)
 		}
 		else if ((eptr->type == E_IMAGE)&&(eptr->pic_data != NULL))
 		{
-			tx1 = eptr->x;
-			tx2 = eptr->x + eptr->pic_data->width;
+			tx1 = eptr->x + eptr->x_offset;
+			tx2 = eptr->x + eptr->pic_data->width + eptr->x_offset;
 			if ((x >= tx1)&&(x <= tx2)&&(y >= ty1)&&(y <= ty2))
 			{
 				rptr = eptr;
@@ -6274,7 +6484,7 @@ LocateElement(hw, x, y, pos)
 		}
 		else if (eptr->type == E_LINEFEED)
 		{
-			tx1 = eptr->x;
+			tx1 = eptr->x + eptr->x_offset;
 			if ((x >= tx1)&&(y >= ty1)&&(y <= ty2))
 			{
 				rptr = eptr;
@@ -6290,7 +6500,7 @@ LocateElement(hw, x, y, pos)
 				int tmpy;
 
 				tmpy = eptr->next->y + eptr->next->line_height;
-				tx2 = eptr->next->x;
+				tx2 = eptr->next->x + eptr->x_offset;
 				if ((x < tx2)&&(y >= ty2)&&(y <= tmpy))
 				{
 					rptr = eptr;
@@ -6316,14 +6526,15 @@ LocateElement(hw, x, y, pos)
 		 * always be <= to this, but just in case, start at the end
 		 * of the string if it is not.
 		 */
-		epos = ((x - rptr->x) / rptr->font->max_bounds.width) + 1;
+		epos = ((x - rptr->x - rptr->x_offset) /
+			rptr->font->max_bounds.width) + 1;
 		if (epos >= rptr->edata_len - 1)
 		{
 			epos = rptr->edata_len - 2;
 		}
 		XTextExtents(rptr->font, (char *)rptr->edata,
 				(epos + 1), &dir, &ascent, &descent, &all);
-		if (x > (int)(rptr->x + all.width))
+		if (x > (int)(rptr->x + all.width + rptr->x_offset))
 		{
 			epos = rptr->edata_len - 3;
 		}
@@ -6336,7 +6547,7 @@ LocateElement(hw, x, y, pos)
 		{
 			XTextExtents(rptr->font, (char *)rptr->edata,
 				(epos + 1), &dir, &ascent, &descent, &all);
-			if ((int)(rptr->x + all.width) <= x)
+			if ((int)(rptr->x + all.width + rptr->x_offset) <= x)
 			{
 				break;
 			}

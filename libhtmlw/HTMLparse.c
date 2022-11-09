@@ -478,6 +478,9 @@ clean_text(txt)
 	ptr = txt;
 	while (*ptr != '\0')
 	{
+/* debug char 
+fprintf(stderr, "%c", ((*ptr & 192) > 64) ? '!' : (*ptr & 192) ? (*ptr) : '_');
+*/
 		if ((*ptr == '&')&&
 			((isalpha((int)*(ptr + 1)))||(*(ptr + 1) == '#')))
 		{
@@ -509,8 +512,8 @@ clean_text(txt)
 		 * Extract the escape sequence from start to ptr
 		 */
 		start = ptr;
-		while ((utf8 && (*ptr & 192)==utf8_mask) || (!utf8 &&
-			(*ptr != ';')&&(!isspace((int)*ptr))&&(*ptr != '\0')))
+		while (((utf8 && (*ptr & 192)==utf8_mask) || (!utf8 &&
+			(*ptr != ';')&&(!isspace((int)*ptr))))&&(*ptr != '\0'))
 		{
 			utf8_mask = 128; /* subsequent characters */
 			ptr++;
@@ -1513,7 +1516,7 @@ ParseMarkType(str)
 		}
 		else {
 			type = (classic_renderer) ? M_UNKNOWN :
-				M_PARAGRAPH;
+				M_TPARAGRAPH;
 		}
 	}
 	else if (caseless_equal(str, MT_MAP))
@@ -1528,6 +1531,11 @@ ParseMarkType(str)
 	} else if (caseless_equal(str, MT_DIV)) {
 		type = (classic_renderer) ? M_UNKNOWN :
 			M_PARAGRAPH;
+	} else if (caseless_equal(str, MT_CENTER)) {
+		type = (classic_renderer) ? M_UNKNOWN : M_CENTER;
+        /* all <no*> tags go here */
+	} else if (caseless_equal(str, MT_SPATIAL)) {
+		type = (classic_renderer) ? M_UNKNOWN : M_OPTIONAL;
 	}
 
 /* ADD NEW HTML TAGS HERE ck */
@@ -1554,6 +1562,8 @@ ParseMarkType(str)
  * On return start and end should point to the beginning, and just
  * after the end of the tag's name in the original anchor string.
  * Finally the function returns the tag value in a malloced buffer.
+ * Cameron sez: Also allow crap like a href=' xxx ' (single quotes)
+ * if using the alternative renderer.
  */
 char *
 AnchorTag(ptrp, startp, endp)
@@ -1565,7 +1575,7 @@ AnchorTag(ptrp, startp, endp)
 	char *ptr;
 	char *start;
 	char tchar;
-	int quoted;
+	char quoted;
 	int has_value;
 
 	quoted = 0;
@@ -1635,9 +1645,10 @@ AnchorTag(ptrp, startp, endp)
 		return(tag_val);
 	}
 
-	if (*ptr == '\"')
+/* Handle src=" and src=' (sigh) */
+	if (*ptr == '\"' || ((!classic_renderer) && *ptr == '\''))
 	{
-		quoted = 1;
+		quoted = *ptr;
 		ptr++;
 	}
 
@@ -1647,7 +1658,10 @@ AnchorTag(ptrp, startp, endp)
 	 */
 	if (quoted)
 	{
+#if(0)
 		while ((*ptr != '\"')&&(*ptr != '\0'))
+#endif
+		while ((*ptr != quoted)&&(*ptr != '\0'))
 		{
 			ptr++;
 		}

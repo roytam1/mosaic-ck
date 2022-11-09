@@ -781,6 +781,8 @@ XGCValues values;
 	}
 
 	if (hw->html.delay_images==True || currently_delaying_images==1) {
+			/* In progressive rendering mode, we DO load the
+				background image. */
 		pic_data = (*(resolveImageProc)(hw->html.resolveImage)
 			    )(hw, bgname, 1, NULL, NULL);
 		if (pic_data!=NULL) { /*it was cached*/
@@ -2279,6 +2281,17 @@ Initialize(
 	 */
 	new->html.line_array = NULL;
 	new->html.line_count = 0;
+
+	/*
+	 * Make sure our <center> depth is 0. -- Cameron
+	 */
+	new->html.center_tag_depth = 0;
+
+	/*
+         * Our default paragraph alignment is default. -- Cameron
+         * Default paragraph alignment is default, by default.
+         */
+	new->html.para_h_alignment = ALIGN_HORIZ_ANY;
 
 	/*
 	 * Find the max width of a preformatted
@@ -4065,7 +4078,6 @@ _HTMLInput(
 {   
 	HTMLWidget hw = (HTMLWidget)XtParent(w);
 	struct ele_rec *eptr;
-	WbAnchorCallbackData cbdata;
 	int epos;
 #ifdef MOTIF
 	Boolean on_gadget;
@@ -4098,6 +4110,28 @@ _HTMLInput(
 	{
 		eptr = LocateElement(hw, event->xbutton.x, event->xbutton.y,
 				&epos);
+		HandleAClick(hw, eptr, event);
+	}
+	return;
+}
+
+
+/* Act as if we clicked on something. Used by other routines. -- Cameron */
+
+void
+#ifdef _NO_PROTO
+HandleAClick(hw, eptr, event)
+HTMLWidget hw;
+struct ele_rec *eptr;
+XEvent *event;
+#else
+HandleAClick(HTMLWidget hw, struct ele_rec *eptr, XEvent *event)
+#endif
+{
+	WbAnchorCallbackData cbdata;
+
+	/* event and eptr can be null. */
+	HideWidgets(hw);
 		if (eptr != NULL)
 		{
 			if (eptr->anchorHRef != NULL)
@@ -4230,9 +4264,10 @@ _HTMLInput(
 				(eptr->anchorHRef != NULL)&&
 				(!IsDelayedHRef(hw, eptr->anchorHRef))&&
 				(!IsIsMapForm(hw, eptr->anchorHRef))&&
+				(event == NULL ||
 				(((event->xbutton.y + hw->html.scroll_y) -
 				  (eptr->y + eptr->y_offset)) >
-				  AnchoredHeight(hw)))
+				  AnchoredHeight(hw))))
 			    {
 				eptr->pic_data = (*(resolveImageProc)
 				    (hw->html.resolveDelayedImage))(hw, eptr->edata);
@@ -4278,6 +4313,7 @@ _HTMLInput(
 			    else if ((eptr->pic_data != NULL)&&
 				(eptr->pic_data->ismap)&&
 				(eptr->anchorHRef != NULL)&&
+				(event != NULL) &&
 				(IsIsMapForm(hw, eptr->anchorHRef)))
 			    {
 				int form_x, form_y;
@@ -4301,7 +4337,8 @@ _HTMLInput(
 			     	int alloced = 0;
 			     	char *buf = eptr->anchorHRef;
 				if (eptr->type == E_IMAGE && eptr->pic_data
-				        && eptr->pic_data->ismap) {
+				        && eptr->pic_data->ismap
+					&& event != NULL) {
 				    buf = (char *)
 				        malloc(strlen(eptr->anchorHRef) + 256);
 				    alloced = 1;
@@ -4333,8 +4370,7 @@ _HTMLInput(
 			mailToKludgeURL = NULL;
 			}
 		}
-	}
-
+	ScrollWidgets(hw);
 	return;
 }
 
@@ -4604,6 +4640,8 @@ SetValues(
 		new->html.new_start_pos = 0;
 		new->html.new_end_pos = 0;
 		new->html.active_anchor = NULL;
+		new->html.center_tag_depth = 0;
+		new->html.para_h_alignment = ALIGN_HORIZ_ANY;
 	}
 	else if ((request->html.font != current->html.font)||
 	         (request->html.italic_font != current->html.italic_font)||
@@ -5117,7 +5155,7 @@ HTMLIdToPosition(Widget w, int element_id, int *x, int *y)
 	}
 	else
 	{
-		*x = eptr->x;
+		*x = eptr->x + eptr->x_offset;
 		*y = eptr->y;
 		return(1);
 	}
@@ -7154,4 +7192,39 @@ void HTMLSetFocusPolicy(Widget w, int to)
 	     toplevel shell to pointer */
 	}
     }
+}
+
+/* This finds the "next" delayed image and loads it as part of progressive
+   rendering. If one is found, we get to ride again! -- Cameron */
+
+int HTMLLoadNextDelayedImage(HTMLWidget hw)
+{
+	struct ele_rec *eptr;
+	struct ele_rec *fptr;
+	int ele_count;
+
+	eptr = hw->html.formatted_elements;
+	while (eptr != NULL) {
+		if ((eptr->pic_data != NULL)&& (eptr->pic_data->delayed)
+				&& (!eptr->bad_mojo)) {
+			HandleAClick(hw, eptr, NULL);
+			/* Now search again. If we come up with the same
+				eptr, don't keep trying to load it. This
+				handles failed loads on sites with bad src. */
+			fptr = hw->html.formatted_elements;
+			while(fptr != NULL) {
+				if ((fptr->pic_data != NULL) &&
+						(!fptr->bad_mojo) &&
+						(fptr->pic_data->delayed)) {
+					if (fptr == eptr) /* Eep! Loop! */
+						fptr->bad_mojo = True;
+					return 1; /* Ok, something else */
+				}
+				fptr = fptr->next;
+			}
+			return 0; /* we already know there's nothing to do */
+		}
+		eptr = eptr->next;
+	}
+	return 0; /* nothing to do */
 }

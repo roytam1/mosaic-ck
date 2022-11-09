@@ -1,3 +1,5 @@
+/* Changes for Mosaic-CK (C)2010 Cameron Kaiser */
+
 /****************************************************************************
  * NCSA Mosaic for the X Window System                                      *
  * Software Development Group                                               *
@@ -506,16 +508,26 @@ mo_status mo_wipe_global_history (mo_window *win)
 static char *cached_global_hist_fname = NULL;
 mo_status mo_setup_global_history (void)
 {
-  char *home = getenv ("HOME");
   char *default_filename = get_pref_string(eGLOBAL_HISTORY_FILE);
   char *filename;
   FILE *fp;
+  char *home;
+  int rv;
 
   mo_init_global_history ();
 
+#if(0)
+  rv = SYS_NO_MEMORY; /* LIE! */
+  home = getenv("HOME");
   /* This shouldn't happen. */
   if (!home)
     home = "/tmp";
+#else
+  rv = get_mosaic_home(&home);
+  /* This shouldn't happen. */
+  if (rv != SYS_SUCCESS)
+	home = "/tmp";
+#endif
   
   filename = (char *)malloc 
     ((strlen (home) +
@@ -553,6 +565,8 @@ mo_status mo_setup_global_history (void)
 
   cached_global_hist_fname = filename;
 
+  if (rv == SYS_SUCCESS)
+	free(home);
   return mo_succeed;
 }
 

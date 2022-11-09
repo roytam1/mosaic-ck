@@ -1,4 +1,4 @@
-/* Changes for Mosaic-CK (C)2009 Cameron Kaiser */
+/* Changes for Mosaic-CK (C)2009, 2010 Cameron Kaiser */
 
 /****************************************************************************
  * NCSA Mosaic for the X Window System                                      *
@@ -133,16 +133,16 @@ static XtResource resources[] = {
 #endif /* not _AIX */
   { "globalHistoryFile", "GlobalHistoryFile", XtRString, 
       sizeof (char *),
-      offset (global_history_file), XtRString, ".mosaic-global-history" },
+      offset (global_history_file), XtRString, "mosaic-global-history" },
   { "historyFile", "HistoryFile", XtRString, 
       sizeof (char *),
-      offset (history_file), XtRString, ".mosaic-x-history" },
+      offset (history_file), XtRString, "mosaic-x-history" },
   { "defaultHotlistFile", "DefaultHotlistFile", XtRString, 
       sizeof (char *),
-      offset (default_hotlist_file), XtRString, ".mosaic-hotlist-default" },
+      offset (default_hotlist_file), XtRString, "mosaic-hotlist-default" },
   { "defaultHotFile", "DefaultHotFile", XtRString, 
       sizeof (char *),
-      offset (default_hot_file), XtRString, ".mosaic-hot.html" },
+      offset (default_hot_file), XtRString, "mosaic-hot.html" },
   { "addHotlistAddsRBM", "AddHotlistAddsRBM", XtRBoolean, sizeof (Boolean),
       offset (addHotlistAddsRBM), XtRString, "True" },
   { "addRBMAddsRBM", "AddRBMAddsRBM", XtRBoolean, sizeof (Boolean),
@@ -150,7 +150,7 @@ static XtResource resources[] = {
   { "personalAnnotationDirectory", "PersonalAnnotationDirectory", XtRString, 
       sizeof (char *),
       offset (private_annotation_directory), XtRString, 
-      ".mosaic-personal-annotations" },
+      "mosaic-personal-annotations" },
   /* Whether selections should be fancy, by default. */
   { "fancySelections", "FancySelections", XtRBoolean,
       sizeof (Boolean), offset (default_fancy_selections), 
@@ -265,7 +265,7 @@ static XtResource resources[] = {
 
   { "documentsMenuSpecfile", "DocumentsMenuSpecfile", XtRString, sizeof (char *),
       offset (documents_menu_specfile), XtRString, 
-      "/usr/local/lib/mosaic/documents.menu" },
+      "~/documents.menu" },
 
   { "reloadReloadsImages", "ReloadReloadsImages", XtRBoolean, sizeof (Boolean),
       offset (reload_reloads_images), XtRString, "False" },
@@ -486,11 +486,11 @@ static XtResource resources[] = {
 
   { "proxySpecfile", "ProxySpecfile", XtRString, sizeof (char *),
       offset (proxy_specfile), XtRString, 
-      "/usr/local/lib/mosaic/proxy" },
+      "~/proxy" },
 
   { "noproxySpecfile", "NoproxySpecfile", XtRString, sizeof (char *),
       offset (noproxy_specfile), XtRString, 
-      "/usr/local/lib/mosaic/no_proxy" },
+      "~/no_proxy" },
   
   { "useScreenGamma", "UseScreenGamma", XtRBoolean, sizeof (Boolean),
       offset (useScreenGamma), XtRString, "False" },
@@ -621,8 +621,8 @@ static String color_resources[] = {
   "*XmMenuShell*XmToggleButtonGadget*fontList: -*-helvetica-bold-o-normal-*-14-*-iso8859-1",
   "*pulldownmenu*fontList:	-*-helvetica-bold-o-normal-*-14-*-iso8859-1",
   "*XmList*fontList:	-*-helvetica-medium-r-normal-*-14-*-iso8859-1",
-  "*XmText.fontList:      -*-lucidatypewriter-medium-r-normal-*-14-*-iso8859-1",
-  "*XmTextField.fontList: -*-lucidatypewriter-medium-r-normal-*-14-*-iso8859-1",
+  "*XmText.fontList:      -*-lucidatypewriter-medium-r-normal-*-12-*-iso8859-1",
+  "*XmTextField.fontList: -*-lucidatypewriter-medium-r-normal-*-12-*-iso8859-1",
   
   "*optionmenu*marginHeight: 	0",
   "*optionmenu*marginTop: 		5",

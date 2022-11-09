@@ -193,7 +193,7 @@ PRIVATE void write_selector_text ARGS1(WWW_CONST char *,addr) {
 PRIVATE void write_anchor ARGS3(WWW_CONST char *,text, WWW_CONST char *,addr,
                                 char *, image_text)
 {
-    PUTS ("<A HREF=\"");
+    PUTS ("<NOBR><A HREF=\"");
 	/* DO NOT PUTS(addr)! this is exploitable! -- ck */
     write_selector_text(addr);
     PUTS ("\">");
@@ -209,7 +209,7 @@ PRIVATE void write_anchor ARGS3(WWW_CONST char *,text, WWW_CONST char *,addr,
     	    
     write_entity_text(text); /* DO NOT PUTS(text)! this is exploitable! -- ck*/
     PUTS("</TT>");
-    PUTS("</A>");
+    PUTS("</A></NOBR>");
 }
 
 

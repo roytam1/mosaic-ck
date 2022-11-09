@@ -1821,14 +1821,14 @@ WriteProxies(Widget w, XtPointer client, XtPointer call)
 	p = pEditInfo->proxy_list;
 
 	if (pEditInfo->fProxy) {
-                if ((fp = fopen(get_pref_string(ePROXY_SPECFILE),"w")) == NULL) {
+                if ((fp = rfopen(get_pref_string(ePROXY_SPECFILE),"w")) == NULL) {
                         sprintf(msgbuf,SAVE_ERROR, get_pref_string(ePROXY_SPECFILE));
 			XmxMakeErrorDialog(mo_main_window->base, msgbuf, "Error writing file");
 			XtManageChild (Xmx_w);
 			return;
 		}
 	} else { 
-                if ((fp = fopen(get_pref_string(eNOPROXY_SPECFILE),"w")) == NULL) {
+                if ((fp = rfopen(get_pref_string(eNOPROXY_SPECFILE),"w")) == NULL) {
                         sprintf(msgbuf,SAVE_ERROR, get_pref_string(eNOPROXY_SPECFILE));
 			XmxMakeErrorDialog(mo_main_window->base, msgbuf, "Error writing file");
 			XtManageChild (Xmx_w);
@@ -1863,10 +1863,13 @@ WriteProxies(Widget w, XtPointer client, XtPointer call)
 		p = p->next;
 	}
 
+/*
 	if (pEditInfo->fProxy)
                 sprintf(msgbuf,SAVED_AOK,get_pref_string(ePROXY_SPECFILE));
 	else
                 sprintf(msgbuf,SAVED_AOK,get_pref_string(eNOPROXY_SPECFILE));
+*/
+	sprintf(msgbuf, "Proxy settings saved.");
 
 	XmxMakeInfoDialog(mo_main_window->base, msgbuf, "File Saved");
 	XtManageChild (Xmx_w);

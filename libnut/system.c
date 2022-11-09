@@ -1052,3 +1052,48 @@ int get_home(char **ret)
 
 return(SYS_SUCCESS);
 }
+
+/* Utility function for .mosaic. Essentially take get_home(), then tack
+   on .mosaic. EASY! -- Cameron */
+/* Remember to free this when you're done with it! */
+
+int get_mosaic_home(char **ret) {
+/* If I had my druthers, I would make this a proper malloc, but I assume
+  that if your home path is > 255 chars, you have bigger problems. */
+	char *home_dir;
+	char *mos_dir;
+	char *mac_dir; /* This is just some sugah for OS X. */
+	int rv;
+
+	rv = get_home(&home_dir);
+	if (rv != SYS_SUCCESS)
+		return rv;
+	mos_dir = malloc(sizeof(char) * (strlen(home_dir) + 9));
+	if (mos_dir == NULL)
+		return SYS_NO_MEMORY;
+	sprintf(mos_dir, "%s/.mosaic", home_dir);
+	/* fprintf(stderr, "output: %s\n", mos_dir);  */
+
+	/* Make the directory. If it already exists, no problem. */
+	if (mkdir(mos_dir, S_IRUSR | S_IWUSR | S_IXUSR)) {
+		if (errno != EEXIST) {
+		fprintf(stderr, "Warning: could not mkdir %s\n", mos_dir);
+		} else {
+			/* For OS X, symlink it to ~/Library/Mosaic-CK, if we
+				can do so. */
+			mac_dir = malloc(sizeof(char) * (strlen(home_dir)+20));
+			if (mac_dir != NULL) {
+				sprintf(mac_dir, "%s/Library/Mosaic-CK",
+					home_dir);
+				symlink(mos_dir, mac_dir); /* don't
+					care if this fails. */
+				free(mac_dir);
+			}
+		}
+	} else {
+printf("Created ~/.mosaic (and ~/Library/Mosaic-CK where supported)\n");	
+	}
+	*ret = mos_dir;
+	free(home_dir);
+	return(SYS_SUCCESS);
+}

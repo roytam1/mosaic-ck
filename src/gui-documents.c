@@ -1,3 +1,5 @@
+/* Changes for Mosaic-CK (C)2009, 2010 Cameron Kaiser */
+
 /****************************************************************************
  * NCSA Mosaic for the X Window System                                      *
  * Software Development Group                                               *
@@ -72,6 +74,7 @@ extern char *startup_document, *home_document;
 extern Display *dsp;
 extern char reloading;
 extern int do_meta;
+extern int sleep_interrupt;
 
 #ifndef DISABLE_TRACE
 extern int srcTrace;
@@ -94,6 +97,7 @@ extern char *HTTP_expires;
 /* add more sense and sensibility to rbm */
 void mo_popup_set_something();
 
+void mo_start_async_loads(XtPointer mwin, XtIntervalId *id);
 static Boolean check_imagedelay (char *url);
 static mo_status mo_snarf_scrollbar_values (mo_window *win);
 static mo_status mo_reset_document_headers (mo_window *win);
@@ -114,6 +118,7 @@ extern Boolean currently_delaying_images;
 /* for progressive rendering */
 
 extern Boolean progressive_rendering;
+extern XtAppContext app_context;
 
 /* for updated renderer */
 
@@ -121,6 +126,20 @@ extern Boolean classic_renderer;
 
 /*******************************/
 
+/* add a rotating timeout to load images -- Cameron */
+
+void mo_start_async_loads(XtPointer mwin, XtIntervalId *id) {
+	mo_window *win;
+
+	win = mwin;
+	if (!progressive_rendering)
+		return;
+	if (interrupted || sleep_interrupt)
+		return;
+	if(HTMLLoadNextDelayedImage((HTMLWidget)win->scrolled_win)) {
+		XtAppAddTimeOut(app_context, 250, mo_start_async_loads, win);
+	}
+}
 
 
 /****************************************************************************
@@ -598,6 +617,9 @@ mo_status mo_do_window_text (mo_window *win, char *url, char *txt,
         did_we_image_delay=0;
     }
   
+  /* Start any asynchronous loads */
+  sleep_interrupt = 0;
+  if (progressive_rendering) mo_start_async_loads(win, NULL);
   return mo_succeed;
 }
 

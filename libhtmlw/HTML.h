@@ -82,67 +82,6 @@ typedef struct link_rec {
 } LinkInfo;
 
 /*
- * Public functions
- */
-#ifdef _NO_PROTO
-extern char *HTMLGetText ();
-extern char *HTMLGetTextAndSelection ();
-extern char **HTMLGetHRefs ();
-extern char **HTMLGetImageSrcs ();
-extern void *HTMLGetWidgetInfo ();
-extern void HTMLFreeWidgetInfo ();
-extern void HTMLFreeImageInfo ();
-extern LinkInfo *HTMLGetLinks ();
-extern int HTMLPositionToId ();
-extern int HTMLIdToPosition ();
-extern int HTMLAnchorToPosition ();
-extern int HTMLAnchorToId ();
-extern void HTMLGotoId ();
-extern void HTMLRetestAnchors ();
-extern void HTMLClearSelection ();
-extern void HTMLSetSelection ();
-extern void HTMLSetText ();
-extern void HTMLSetAppInsensitive();
-extern int HTMLSearchText ();
-extern int HTMLSearchNews();
-extern void HTMLSetAppSensitive();
-extern void HTMLTraverseTabGroups();
-extern void HTMLDrawBackgroundImage();
-extern void HTMLSetFocusPolicy();
-#else
-extern char *HTMLGetText (Widget w, int pretty, char *url, char *time_str);
-extern char *HTMLGetTextAndSelection (Widget w, char **startp, char **endp,
-					char **insertp);
-extern char **HTMLGetHRefs (Widget w, int *num_hrefs);
-extern char **HTMLGetImageSrcs (Widget w, int *num_srcs);
-extern void *HTMLGetWidgetInfo (Widget w);
-extern void HTMLFreeWidgetInfo (void *ptr);
-extern void HTMLFreeImageInfo (Widget w);
-extern LinkInfo *HTMLGetLinks (Widget w, int *num_links);
-extern int HTMLPositionToId(Widget w, int x, int y);
-extern int HTMLIdToPosition(Widget w, int element_id, int *x, int *y);
-extern int HTMLAnchorToPosition(Widget w, char *name, int *x, int *y);
-extern int HTMLAnchorToId(Widget w, char *name);
-extern void HTMLGotoId(Widget w, int element_id, int correction);
-extern void HTMLRetestAnchors(Widget w, visitTestProc testFunc);
-extern void HTMLClearSelection (Widget w);
-extern void HTMLSetSelection (Widget w, ElementRef *start, ElementRef *end);
-extern void HTMLSetText (Widget w, char *text, char *header_text,
-			char *footer_text, int element_id,
-			char *target_anchor, void *ptr);
-extern int HTMLSearchNews(Widget w,ElementRef *m_start, ElementRef *m_end);
-extern int HTMLSearchText (Widget w, char *pattern,
-	ElementRef *m_start, ElementRef *m_end, int backward, int caseless);
-extern void HTMLSetAppInsensitive(Widget hw);
-extern void HTMLSetAppSensitive(Widget hw);
-extern void HTMLTraverseTabGroups();
-extern void HTMLDrawBackgroundImage(Widget w, int x, int y, int width, 
-				    int height);
-extern void HTMLSetFocusPolicy(Widget w, int to);
-#endif /* _NO_PROTO */
-
-
-/*
  * Public Structures
  */
 typedef struct acall_rec {
@@ -329,6 +268,7 @@ typedef ImageInfo *(*resolveImageProc)();
 #define ALIGN_LEFT	3
 #define ALIGN_CENTER	4
 #define ALIGN_RIGHT	5
+#define ALIGN_HORIZ_ANY	6	/* i.e., not specified */
 
 
 struct ele_rec {
@@ -338,12 +278,15 @@ struct ele_rec {
 	TableInfo *table_data;
 	XFontStruct *font;
 	int alignment;
+	int h_alignment; /* ck */
 	Boolean internal;
 	Boolean selected;
+	Boolean bad_mojo; /* ck - used to mark bad elements */
 	int indent_level;
 	int start_pos, end_pos;
 	int x, y;
 	int bwidth;
+	int x_offset; /* ck */
 	int y_offset;
 	int width;
 	int line_number;
@@ -446,6 +389,9 @@ struct delay_rec {
 /* ck */
 #define M_SCRIPT	60
 #define M_STYLESHEET	61
+#define M_OPTIONAL	62
+#define M_CENTER	63
+#define M_TPARAGRAPH	64 /* special <td> marker */
 
 /* syntax of Mark types */
 #define	MT_TITLE	"title"
@@ -510,6 +456,8 @@ struct delay_rec {
 #define MT_SCRIPT	"script"
 #define MT_STYLESHEET	"style"
 #define MT_DIV		"div"
+#define MT_SPATIAL	"spatial"
+#define MT_CENTER	"center"
 
 /* anchor tags */
 #define	AT_NAME		"name"
@@ -517,6 +465,8 @@ struct delay_rec {
 #define	AT_SUBJECT	"subject"
 #define	AT_TITLE	"title"
 
+/* alignment tags */
+#define AL_ALIGN	"align"
 
 struct mark_up {
 	int type;
@@ -641,6 +591,69 @@ typedef struct _HTMLClassRec *HTMLWidgetClass;
 typedef struct _HTMLRec      *HTMLWidget;
 
 extern WidgetClass htmlWidgetClass;
+
+/*
+ * Public functions
+ */
+#ifdef _NO_PROTO
+extern char *HTMLGetText ();
+extern char *HTMLGetTextAndSelection ();
+extern char **HTMLGetHRefs ();
+extern char **HTMLGetImageSrcs ();
+extern void *HTMLGetWidgetInfo ();
+extern void HTMLFreeWidgetInfo ();
+extern void HTMLFreeImageInfo ();
+extern LinkInfo *HTMLGetLinks ();
+extern int HTMLPositionToId ();
+extern int HTMLIdToPosition ();
+extern int HTMLAnchorToPosition ();
+extern int HTMLAnchorToId ();
+extern void HTMLGotoId ();
+extern void HTMLRetestAnchors ();
+extern void HTMLClearSelection ();
+extern void HTMLSetSelection ();
+extern void HTMLSetText ();
+extern void HTMLSetAppInsensitive();
+extern int HTMLSearchText ();
+extern int HTMLSearchNews();
+extern void HTMLSetAppSensitive();
+extern void HTMLTraverseTabGroups();
+extern void HTMLDrawBackgroundImage();
+extern void HTMLSetFocusPolicy();
+#else
+extern char *HTMLGetText (Widget w, int pretty, char *url, char *time_str);
+extern char *HTMLGetTextAndSelection (Widget w, char **startp, char **endp,
+					char **insertp);
+extern char **HTMLGetHRefs (Widget w, int *num_hrefs);
+extern char **HTMLGetImageSrcs (Widget w, int *num_srcs);
+extern void *HTMLGetWidgetInfo (Widget w);
+extern void HTMLFreeWidgetInfo (void *ptr);
+extern void HTMLFreeImageInfo (Widget w);
+extern LinkInfo *HTMLGetLinks (Widget w, int *num_links);
+extern int HTMLPositionToId(Widget w, int x, int y);
+extern int HTMLIdToPosition(Widget w, int element_id, int *x, int *y);
+extern int HTMLAnchorToPosition(Widget w, char *name, int *x, int *y);
+extern int HTMLAnchorToId(Widget w, char *name);
+extern void HTMLGotoId(Widget w, int element_id, int correction);
+extern void HTMLRetestAnchors(Widget w, visitTestProc testFunc);
+extern void HTMLClearSelection (Widget w);
+extern void HTMLSetSelection (Widget w, ElementRef *start, ElementRef *end);
+extern void HTMLSetText (Widget w, char *text, char *header_text,
+			char *footer_text, int element_id,
+			char *target_anchor, void *ptr);
+extern int HTMLSearchNews(Widget w,ElementRef *m_start, ElementRef *m_end);
+extern int HTMLSearchText (Widget w, char *pattern,
+	ElementRef *m_start, ElementRef *m_end, int backward, int caseless);
+extern void HTMLSetAppInsensitive(Widget hw);
+extern void HTMLSetAppSensitive(Widget hw);
+extern void HTMLTraverseTabGroups();
+extern void HTMLDrawBackgroundImage(Widget w, int x, int y, int width, 
+				    int height);
+extern void HTMLSetFocusPolicy(Widget w, int to);
+extern void HandleAClick(HTMLWidget hw, struct ele_rec *eptr, XEvent *event);
+extern int HTMLLoadNextDelayedImage(HTMLWidget hw);
+#endif /* _NO_PROTO */
+
 
 
 #endif /* HTML_H */

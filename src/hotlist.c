@@ -1,3 +1,5 @@
+/* Changes for Mosaic-CK (C)2010 Cameron Kaiser */
+
 /****************************************************************************
  * NCSA Mosaic for the X Window System                                      *
  * Software Development Group                                               *
@@ -1295,14 +1297,24 @@ mo_status mo_dump_hotlist (mo_hotlist *list)
  */
 mo_status mo_setup_default_hotlist (void)
 {
-  char *home = getenv ("HOME");
+  char *home;
   char *default_filename = get_pref_string(eDEFAULT_HOTLIST_FILE);
   char *hot_filename = get_pref_string(eDEFAULT_HOT_FILE);
   char *filename;
+  int rv;
   
+#if(0)
+  rv = SYS_NO_MEMORY; /* LIE! */
+  home = getenv("HOME");
   /* This shouldn't happen. */
   if (!home)
     home = "/tmp";
+#else
+  rv = get_mosaic_home(&home);
+  /* This shouldn't happen. */
+  if (rv != SYS_SUCCESS)
+	home = "/tmp";
+#endif
   
   filename = (char *)malloc 
     ((strlen (home) + strlen (default_filename) + 8) * sizeof (char));
@@ -1313,7 +1325,7 @@ mo_status mo_setup_default_hotlist (void)
   /* Doesn't exist?  Bummer.  Make a new one. */
   if (!default_hotlist)
     {
-      fprintf(stderr,"Could not find a hotlit. Creating a new one.\n");
+      fprintf(stderr,"Could not find a hotlist. Creating a new one.\n");
       /* amb - doesn't have any hotlist, add the .html extension (ugh) */
 /*      sprintf(filename, "%s/%s.html", home, default_filename); */
 /* New hotlist format... SWP */
@@ -1324,6 +1336,8 @@ mo_status mo_setup_default_hotlist (void)
       default_hotlist = mo_new_root_hotlist (filename, "Default");
     }
   
+  if (rv == SYS_SUCCESS)
+	free(home);
   return mo_succeed;
 }
 

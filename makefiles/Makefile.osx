@@ -176,6 +176,7 @@ PURIFY = purify
 QUANTIFY = quantify
 
 default: $(dtmdirs) libwww2 libXmx libhtmlw libnut src
+	cp src/Mosaic motifmaclauncher/mosaic-mml
 	@echo \*\*\* Welcome to NCSA Mosaic.
 purifyd: $(dtmdirs) libwww2 libXmx libhtmlw libnut src-purifyd
 	@echo \*\*\* Welcome to Purify'd NCSA Mosaic.

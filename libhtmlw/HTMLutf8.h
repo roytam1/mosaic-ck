@@ -70,6 +70,12 @@ typedef struct utf8_esc_rec {
 
 /* For performance, put common sequences first. */
 static UTF8Esc UTF8Escapes[] = {
+	/* spaces */
+	{"\xc2\xa0", ' '},
+
+	/* nbsp */
+	{"\xe2\x80\x8e", ' '},
+
 	/* quotes */
 	{"\xe2\x80\x98", '\''},
 	{"\xe2\x80\x99", '\''},
@@ -77,7 +83,11 @@ static UTF8Esc UTF8Escapes[] = {
 	{"\xe2\x80\x9d", '"'}, 
 
 	/* dashes */
-	{"\xe2\x80\x93", '-'},
+	{"\xe2\x80\x93", '-'}, /* en dash */
+	{"\xe2\x80\x94", '-'}, /* em dash */
+
+	/* dot dot dot -- this is obviously imprecise */
+	{"\xe2\x80\xa6", '\267'},
 
 	/* bullets */
 	{"\xc2\xb7", '*'},
@@ -85,9 +95,13 @@ static UTF8Esc UTF8Escapes[] = {
 
 	/* Latin diacritics */
 	{"\xc3\xa9", '\351'}, /* eacute */
+	{"\xc3\xbc", '\374'}, /* uuml */
+	{"\xc5\x8d", '\364'}, /* o macron -> ocirc */
+	{"\xc5\x8f", 'o'}, /* hmm. should be o with a reverse hacek */
 
 	/* miscellaneous */
 	{"\xe2\x86\xa9", '<'}, /* curly arrow */
+	{"\xc3\x97", 'x'}, /* multiplication sign */
 
 	{NULL, '\0'},
 };

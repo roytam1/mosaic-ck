@@ -1,3 +1,5 @@
+/* Changes for Mosaic-CK (C)2010 Cameron Kaiser */
+
 /****************************************************************************
  * NCSA Mosaic for the X Window System                                      *
  * Software Development Group                                               *
@@ -59,6 +61,7 @@
  *
  */
 #include "../config.h"
+#include "../libnut/system.h"
 #include "mosaic.h"
 
 #include <pwd.h>
@@ -69,9 +72,9 @@
 /* Defines */
 /***********/
 
-#define PREFS_FILE_IO 0
+#define PREFS_FILE_IO 1
 
-#define PREFERENCES_FILENAME ".mosaic-preferences"
+#define PREFERENCES_FILENAME "mosaic-preferences"
 #define PREFERENCES_MAJOR_VERSION 1
 #define PREFERENCES_MINOR_VERSION 0
 
@@ -137,10 +140,14 @@ Boolean preferences_genesis(void) {
  ***************************************************************************/
 Boolean preferences_armegeddon(void) {
 
+/* We get a chance to clean up. But man, how can you misspell Armageddon?
+   Cameron */
+
     Boolean successful = 1;
 
-       /* write the prefs file just to be safe */
-        /*write_preferences_file(thePrefsStructP);*/
+#if PREFS_FILE_IO
+        write_preferences_file(thePrefsStructP);
+#endif
 
        /* free preferences structure */
     free(thePrefsStructP);
@@ -164,6 +171,7 @@ Boolean preferences_armegeddon(void) {
  ***************************************************************************/
 static Boolean create_prefs_filename(char *fname) {
 
+#if(0)
     char *home_ptr, home[256];
     struct passwd *pwdent;
     
@@ -182,9 +190,17 @@ static Boolean create_prefs_filename(char *fname) {
     else {
         strcpy(home,home_ptr);
     }
-    
-    sprintf(fname,"%s/%s",home,PREFERENCES_FILENAME);
-    
+    sprintf(fname,"%s/%s",home_ptr,PREFERENCES_FILENAME);
+#else
+    char *home_ptr;
+    int rv;
+
+    rv = get_mosaic_home(&home_ptr);
+    if (rv != SYS_SUCCESS)
+	return 0;
+    sprintf(fname,"%s/%s",home_ptr,PREFERENCES_FILENAME);
+    free(home_ptr);
+#endif 
     return(1);
     
 }
@@ -198,6 +214,7 @@ Boolean read_preferences_file(prefsStructP inPrefsStruct) {
 
     FILE *fp;
     Boolean successful = 1;
+    char line_in[256];
 
 
     /* if the incoming pointer is NULL, then we use the main structure */
@@ -227,9 +244,52 @@ Boolean read_preferences_file(prefsStructP inPrefsStruct) {
         fprintf(stderr, "Error: Can't open preferences file for reading\n");
         return 0;
     }
-    
-    /* but first, check the version number of the prefs file */
 
+    /* This is pretty simple-minded. Lines with # and blank are comments.
+       Otherwise, sscanf the line and try to match it with a string we know.
+       Like I say, we really need to set up some preprocessor macros when
+       we 'do this right'. -- Cameron */
+
+#define DO_PBOOL(x, y) if(!strcmp(key, x)) { \
+	set_pref_boolean(y, (boolean_true) ? False : True); continue; }
+
+    while(fgets(line_in, 255, fp) != NULL) {
+	if(strlen(line_in) > 1 && line_in[0] != '#' && line_in[0] != ' '
+			&& line_in[0] != '\t') {
+		char key[256];
+		char value[256];
+		/* remember, count the newline */
+		if(sscanf(line_in, "%s %s\n", key, value) == 2) {
+			int boolean_true;
+			int boolean_false;
+
+			/* Drop the colon on key */
+			key[(strlen(key)-1)] = '\0';
+
+			/* Check for int */
+			/* ... not yet */
+
+			/* Check for boolean string */
+			boolean_true = strcmp(value, "True");
+			boolean_false = strcmp(value, "False");
+/*
+			fprintf(stderr, "key line: %s %s %i %i\n",
+				key, value, boolean_true, boolean_false);
+*/
+			if (!boolean_true || !boolean_false) {
+				DO_PBOOL("CLASSIC_RENDERER", eBETTER_RENDERER);
+				DO_PBOOL("PROGRESSIVE_RENDERING", ePROGRESSIVE_RENDERING);
+				DO_PBOOL("IMAGEVIEWINTERNAL", eIMAGEVIEWINTERNAL);
+				DO_PBOOL("ENABLE_TABLES", eENABLE_TABLES);
+				DO_PBOOL("DELAY_IMAGE_LOADS", eDELAY_IMAGE_LOADS);
+			}
+
+			/* Fall through to generic string */
+			/* ... not yet */
+		}
+	}
+    }
+    
     fclose(fp);
 
 #endif
@@ -361,13 +421,16 @@ static Boolean write_preferences_file(prefsStructP inPrefsStruct) {
 
         /* write out our little header... */
 
-    fprintf(fp, "# NCSA Mosaic preferences file\n");
+    fprintf(fp, "# Mosaic-CK preferences file\n");
     fprintf(fp, "# File Version: %d.%d\n",
             PREFERENCES_MAJOR_VERSION,
             PREFERENCES_MINOR_VERSION);
+    fprintf(fp, "# Warning - very few preferences actually do anything\n");
     fprintf(fp, "# Warning - this is NOT a user editable file!!!\n");
     fprintf(fp, "# If a character is out of place...it will be very bad.\n\n");
 
+/* This needs to be replaced with preprocessor magic so that everything
+   stays in sync. -- Cameron */
   
 /* access all the fields in the prefs structure, and write them out */
 
@@ -527,7 +590,7 @@ static Boolean write_preferences_file(prefsStructP inPrefsStruct) {
 
 /* Updates for Mosaic-CK */
     write_pref_boolean (fp, ePROGRESSIVE_RENDERING, "PROGRESSIVE_RENDERING");
-    write_pref_boolean (fp, eBETTER_RENDERER, "BETTER_RENDERER");
+    write_pref_boolean (fp, eBETTER_RENDERER, "CLASSIC_RENDERER");
 
     fclose(fp);
     return successful;
@@ -1100,11 +1163,9 @@ float get_pref_float(long pref_id) {
    Function: set_pref_boolean(long pref_id, int value)
    Desc:     Convenience for boolean setting.
  ***************************************************************************/
-void set_pref_boolean(long pref_id, int value) {
+void set_pref_boolean(long pref_id, Boolean value) {
 
-int val=value;
-
-	set_pref(pref_id,&val);
+	set_pref_solid(pref_id, NULL, 0, value);
 }
 
 
@@ -1114,9 +1175,7 @@ int val=value;
  ***************************************************************************/
 void set_pref_int(long pref_id, int value) {
 
-int val=value;
-
-	set_pref(pref_id,&val);
+	set_pref_solid(pref_id, NULL, value, False);
 }
 
 
@@ -1125,8 +1184,11 @@ int val=value;
    Desc:     set the single preference variable denoted by pref_id, to 
                  whatever incoming points to.
  ***************************************************************************/
+/* This is now just a stub for set_pref_solid. */
 void set_pref(long pref_id, void *incoming) {
-
+	set_pref_solid(pref_id, incoming, 0, False);
+}
+void set_pref_solid(long pref_id, void *incoming, int iincoming, Boolean bincoming) {
 
     switch(pref_id) {
 
@@ -1255,8 +1317,8 @@ void set_pref(long pref_id, void *incoming) {
                 *((Boolean *)incoming);
             break;
         case  eDELAY_IMAGE_LOADS:
-            thePrefsStructP->RdataP->delay_image_loads =
-                *((Boolean *)incoming);
+            thePrefsStructP->RdataP->delay_image_loads = bincoming;
+               /* *((Boolean *)incoming); */
             break;
         case  eDEFAULT_AUTHOR_NAME:
             thePrefsStructP->RdataP->default_author_name =
@@ -1375,8 +1437,8 @@ void set_pref(long pref_id, void *incoming) {
                 *((int *)incoming);
             break;
         case  eENABLE_TABLES:
-            thePrefsStructP->RdataP->enable_tables =
-                *((Boolean *)incoming);
+            thePrefsStructP->RdataP->enable_tables = bincoming; 
+                /* *((Boolean *)incoming); */
             break;
         case  eDEFAULT_WIDTH:
             thePrefsStructP->RdataP->default_width =
@@ -1608,8 +1670,8 @@ void set_pref(long pref_id, void *incoming) {
                 *((Boolean *)incoming);
             break;
         case eIMAGEVIEWINTERNAL:
-            thePrefsStructP->RdataP->imageViewInternal =
-                *((Boolean *)incoming);
+            thePrefsStructP->RdataP->imageViewInternal = bincoming;
+              /*  *((Boolean *)incoming); */
             break;
         case eSPLASHSCREEN:
             thePrefsStructP->RdataP->splashScreen =
@@ -1722,13 +1784,18 @@ void set_pref(long pref_id, void *incoming) {
 /* changes for Mosaic-CK */
 
         case ePROGRESSIVE_RENDERING:
-            thePrefsStructP->RdataP->progressiveRendering =
-                *((Boolean *)incoming);
+            thePrefsStructP->RdataP->progressiveRendering = bincoming;
+               /* *((Boolean *)incoming); */
             break;
         case eBETTER_RENDERER:
-            thePrefsStructP->RdataP->classicRenderer =
-                *((Boolean *)incoming);
+            thePrefsStructP->RdataP->classicRenderer = bincoming;
+                /* *((Boolean *)incoming); */
             break;
+
+
+	default:
+		fprintf(stderr, "Warning: unknown pref id %l\n", pref_id);
+		break;
     }
 
 }
@@ -1750,4 +1817,30 @@ void mo_preferences_dialog(mo_window *win) {
 
 }
 
+/* utility fopen() takes a filename, and if it starts with ~, maps it
+   with get_mosaic_home(). -- Cameron */
 
+FILE *rfopen(char *path, char *mode) {
+	char *xpath;
+	char *ypath;
+	char *mpath;
+	FILE *f;
+	int rv;
+
+	if (path[0] != '~') 
+		return fopen(path, mode);
+	rv = get_mosaic_home(&xpath);
+	if (rv)
+		return NULL;
+	ypath = malloc(sizeof(char) * (strlen(xpath) + strlen(path)));
+	if (ypath == NULL)
+		return NULL;
+	mpath = path;
+	*mpath++; /* skip the ~ */
+	sprintf(ypath, "%s%s", xpath, mpath);
+/*	fprintf(stderr, "rfopen called: %s\n", ypath); */
+	f = fopen(ypath, mode);
+	free(ypath);
+	free(xpath);
+	return f;
+}

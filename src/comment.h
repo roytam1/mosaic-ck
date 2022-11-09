@@ -53,7 +53,7 @@
  ****************************************************************************/
 
 
-#define COMMENT_CARD_FILENAME ".mosaic-cc-"
+#define COMMENT_CARD_FILENAME "mosaic-cc-"
 #define COMMENT_TIME 5
 
 #define MO_COMMENT_OS "Not Supported" /**/

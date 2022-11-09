@@ -176,10 +176,23 @@ static AmpEsc AmpEscapes[] = {
 	{"mdash", '-'},
 	{"ndash", '-'},
 	{"bull", '*'},
+	{"larr", '\253'},
+	{"rarr", '\273'},
+	{"trade", '\256'}, /* bogus */
+
+/* Basic support for Windows-1252. These are implemented as "Unicode" using the
+   same support -- see below. Cameron */
+
+	{"#151", '-'},
+	{"#145", '\''},
+	{"#146", '\''},
+	{"#147", '"'},
+	{"#148", '"'},
 
 /* This is where the hacked-in Unicode support lives for &#xxxx where xxxx is
 	a 16-bit quantity. Until we can handle Unicode "natively" this is the
 	best we can do in this case. See also HTMLutf8.h. -- Cameron */
+
 
 	{"#8211", '-'},
 	{"#8212", '-'},
@@ -189,6 +202,7 @@ static AmpEsc AmpEscapes[] = {
 	{"#8221", '"'},
 	{"#160", ' '},
 	{"#9733", '*'},
+	{"#8230", '\267'}, /* imprecise */
 	
 
 	{NULL, '\0'},
